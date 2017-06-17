@@ -20,6 +20,6 @@ class Welcome extends CI_Controller {
 	 */
 	public function index()
 	{
-		$this->load->view('welcome_message');
+		$this->email->send('welcome gmail', 'this is a CI email test', '443474713@qq.com');
 	}
 }
