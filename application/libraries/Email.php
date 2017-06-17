@@ -3,6 +3,7 @@ class Email {
 
     function send($title, $message, $to)
     {
+        date_default_timezone_set("PRC");
         $config = Array(
             'protocol' => 'smtp',
             'smtp_host' => 'ssl://smtp.googlemail.com',
