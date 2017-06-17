@@ -1,5 +1,5 @@
 <?php
-class Email {
+class SMTPEmail {
 
     function send($title, $message, $to)
     {
