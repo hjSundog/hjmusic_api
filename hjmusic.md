@@ -1,32 +1,41 @@
-### 注册
-POST /users 将注册页面输入信息存入数据库中
-#### 传入参数
-|参数名|说明|
-|:--|:--|
-|user_email|用户邮箱|
-|password|用户密码|
-#### 返回值
+##前言
+所有的请求内容都是application/json，且所有请求都会附带Access-Token自定义头部用来让API服务器进行身份认证，未登录的用户Access-Token为空
 
-|参数名|类型|说明|
-|:--|:--|:--|
-|token|string|加密信息|
-|user_id|int|用户id|
-|user_name|string|用户昵称|
-|real_name|string|真实姓名|
-|user_email|string|用户邮箱|
-|auth|string|用户身份|
+### 注册
+
+#### HTTP Request
+POST /users
+#### 传入参数
+| 参数名 | 必须 | 说明 |
+| :-- | :-- | :-- |
+| email | true |用户邮箱 |
+| password | true | 用户密码 |
+#### 返回值
+| 参数名 | 类型 | 说明 |
+| :-- | :-- | :-- |
+| id | int | 用户id |
+| access_token | string | 身份认证令牌 |
+| username | string | 用户昵称 |
+| gender | string | 性别(候选值not_specified,male,female) |
+| realname | string | 真实姓名 |
+| email | string | 用户邮箱 |
+| auth | string | 用户身份(候选值user, admin) |
 
 #### 例子
-    {
-	"user_id": "2",
-	"user_name": "",
-	"real_name": "",
-	"user_email": "1101010@qq.com0",
-	"auth": "undergraduate",
-	"token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE0OTcwMTA3NTAsImF1dGgiOiJ1bmRlcmdyYWR1YXRlIiwidXNlcl9pZCI6IjIifQ.FJOSGojP_gCIIveKDyARLDdPIJeSafPyc1UYtiVmjqk"
-    }
-
+```Json
+ {
+    "id": "1",
+    "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE0OTcwMTA3NTAsImF1dGgiOiJ1bmRlcmdyYWR1YXRlIiwidXNlcl9pZCI6IjIifQ.FJOSGojP_gCIIveKDyARLDdPIJeSafPyc1UYtiVmjqk",
+  "username": "lwio",
+  "realname": "keke",
+  "email": "443474713@qq.com",
+  "auth": "admin",
+}
+```
+------
 ### 登录
+
+#### HTTP Request
 POST /users/signin 对数据库进行身份验证，并将其重定向到新的会话或重定向到登录
 #### 传入参数
 |参数名|说明|
@@ -46,12 +55,12 @@ POST /users/signin 对数据库进行身份验证，并将其重定向到新的�
 
 #### 例子
     {
-	"user_id": "2",
-	"user_name": "",
-	"real_name": "",
-	"user_email": "1101010@qq.com0",
-	"auth": "undergraduate",
-	"token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE0OTcwMTA3NTAsImF1dGgiOiJ1bmRlcmdyYWR1YXRlIiwidXNlcl9pZCI6IjIifQ.FJOSGojP_gCIIveKDyARLDdPIJeSafPyc1UYtiVmjqk"
+  "user_id": "2",
+  "user_name": "",
+  "real_name": "",
+  "user_email": "1101010@qq.com0",
+  "auth": "undergraduate",
+  "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE0OTcwMTA3NTAsImF1dGgiOiJ1bmRlcmdyYWR1YXRlIiwidXNlcl9pZCI6IjIifQ.FJOSGojP_gCIIveKDyARLDdPIJeSafPyc1UYtiVmjqk"
     }
     
 ### 获取用户信息
@@ -73,20 +82,20 @@ GET /users/:id 获取id用户信息
 |auth|string|用户身份|
 
 #### 例子
-	{
-		"user_id": "1",
-		"user_name": "",
-		"real_name": "",
-		"user_email": "110110@qq.com0",
-		"auth": "undergraduate"
-	},
-	{
-		"user_id": "2",
-		"user_name": "",
-		"real_name": "",
-		"user_email": "1101010@qq.com0",
-		"auth": "undergraduate"
-	}
+  {
+    "user_id": "1",
+    "user_name": "",
+    "real_name": "",
+    "user_email": "110110@qq.com0",
+    "auth": "undergraduate"
+  },
+  {
+    "user_id": "2",
+    "user_name": "",
+    "real_name": "",
+    "user_email": "1101010@qq.com0",
+    "auth": "undergraduate"
+  }
     
 ### 获取用户借书情况
 GET /users/:id/books
@@ -106,14 +115,14 @@ GET /users/:id/books
 |create_datetime|string|借出时间|
 |return_datetime|string|归还时间|
 #### 例子
-	{
-		"record_id": "5",
-		"user_id": "19",
-		"book_id": "1",
-		"status": "0",
-		"create_datetime": "0000-00-00 00:00:00",
-		"return_datetime": null
-	}
+  {
+    "record_id": "5",
+    "user_id": "19",
+    "book_id": "1",
+    "status": "0",
+    "create_datetime": "0000-00-00 00:00:00",
+    "return_datetime": null
+  }
 
 ## GET books/
 

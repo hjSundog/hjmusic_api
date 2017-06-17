@@ -20,6 +20,25 @@ class Welcome extends CI_Controller {
 	 */
 	public function index()
 	{
-		$this->SMTPEmail->send('welcome gmail', 'this is a CI email test', '443474713@qq.com');
+		$this->load->library('email');
+		$config = array();
+		$config['useragent'] = "CodeIgniter";
+		$config['protocol'] = 'smtp';
+		$config['smtp_host'] = 'ssl://smtp.googlemail.com';
+		$config['smtp_port'] = 465;
+		$config['smtp_user'] = 'hjsundog@gmail.com';
+		$config['smtp_pass'] = 'fuckfuck';
+		$config['mailtype'] = 'html';
+		$config['charset'] = 'utf-8';
+		$config['newline']  = "\r\n";
+        $config['wordwrap'] = TRUE;
+		$this->email->initialize($config);
+		$this->email->from('hjsundog@gmail.com'); 
+        $this->email->to('443474713@qq.com'); 
+        $this->email->subject("test from hjsundog"); 
+        $this->email->message('this is just a test'); 
+        $this->email->send(); 
+         
+        echo $this->email->print_debugger(); 
 	}
 }
