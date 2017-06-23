@@ -1,6 +1,7 @@
-##前言
+## 前言
 所有的请求内容都是application/json，且所有请求都会附带Access-Token自定义头部用来让API服务器进行身份认证，未登录的用户Access-Token为空
 
+## User
 ### 注册
 
 #### HTTP Request
@@ -24,8 +25,8 @@ POST /users
 #### 例子
 ```Json
  {
-    "id": "1",
-    "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE0OTcwMTA3NTAsImF1dGgiOiJ1bmRlcmdyYWR1YXRlIiwidXNlcl9pZCI6IjIifQ.FJOSGojP_gCIIveKDyARLDdPIJeSafPyc1UYtiVmjqk",
+  "id": "1",
+  "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE0OTcwMTA3NTAsImF1dGgiOiJ1bmRlcmdyYWR1YXRlIiwidXNlcl9pZCI6IjIifQ.FJOSGojP_gCIIveKDyARLDdPIJeSafPyc1UYtiVmjqk",
   "username": "lwio",
   "realname": "keke",
   "email": "443474713@qq.com",
@@ -54,752 +55,168 @@ POST /users/signin 对数据库进行身份验证，并将其重定向到新的�
 |auth|string|用户身份|
 
 #### 例子
-    {
+```
+{
   "user_id": "2",
   "user_name": "",
   "real_name": "",
   "user_email": "1101010@qq.com0",
   "auth": "undergraduate",
   "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE0OTcwMTA3NTAsImF1dGgiOiJ1bmRlcmdyYWR1YXRlIiwidXNlcl9pZCI6IjIifQ.FJOSGojP_gCIIveKDyARLDdPIJeSafPyc1UYtiVmjqk"
-    }
+}
+```
     
 ### 获取用户信息
-GET /users 获取所有注册用户信息 （管理员权限）
+GET /users 获取所有注册用户信息 (需要提供分页和filed两个功能)
 GET /users/:id 获取id用户信息
 #### 传入参数
-|参数名|说明|
-|:--|:--|
-|id|用户id|
+空
 
 #### 返回值
 
-|参数名|类型|说明|
-|:--|:--|:--|
-|user_id|int|用户id|
-|user_name|string|用户昵称|
-|real_name|string|真实姓名|
-|user_email|string|用户邮箱|
-|auth|string|用户身份|
+| 参数名 | 类型 | 说明 |
+| :-- | :-- | :-- |
+| id | int | 用户id |
+| username | string | 用户昵称 |
+| realname | string | 真实姓名 |
+| email | string | 用户邮箱 |
+| auth | string | 用户身份 |
 
 #### 例子
+```
+
   {
-    "user_id": "1",
-    "user_name": "",
-    "real_name": "",
-    "user_email": "110110@qq.com0",
-    "auth": "undergraduate"
+    "id": 3,
+    "username": "lwio",
+    "realname": "keke",
+    "email": "443474713@qq.com",
+    "auth": "admin",
   },
-  {
-    "user_id": "2",
-    "user_name": "",
-    "real_name": "",
-    "user_email": "1101010@qq.com0",
-    "auth": "undergraduate"
-  }
-    
-### 获取用户借书情况
-GET /users/:id/books
+```
+
+## Music
+### 获取音乐情况
+**注意，所有演唱作曲作词都是音乐人，作为一个类型的对象。**
+GET /music
+GET /music/:id
 #### 传入参数
 |参数名|说明|
 |:--|:--|
-|id|用户id|
+|-|-|
 
 #### 返回值
-
 |参数名|类型|说明|
 |:--|:--|:--|
-|record_id|int|借阅id|
-|user_id|int|用户id|
-|book_id|int|图书id|
-|status|string|借阅状态|
-|create_datetime|string|借出时间|
-|return_datetime|string|归还时间|
+|id|int|音乐id|
+|name|string|歌名|
+| cover_url | string | 封面图片路径 |
+|singer|object|演唱者|
+|composer|object|作曲者|
+|lyricist|object|作词者|
+| lyric_url | string | 歌词请求url |
+| album | object | 所属专辑 |
+| src_url | string | 音频资源路径 |
+| published_at | string | UTC时间(2009-01-17T20:14:40Z) |
 #### 例子
-  {
-    "record_id": "5",
-    "user_id": "19",
-    "book_id": "1",
-    "status": "0",
-    "create_datetime": "0000-00-00 00:00:00",
-    "return_datetime": null
-  }
-
-## GET books/
-
----
-
-Get All Book Information
-
-##### Authorization
-
----
-
-No
-
-##### Parameters
-
----
-
-No Parameters
-
-##### METHOD
-
----
-
-GET
-
-##### EXAMPLE
-
----
-
-    GET index.php/books/
-
-##### RESULT
-
----
-
-*** JSON EXAMPLE ***
-    
-    {
-      "book_id": 1,
-      "book_name": "Digital Castle",
-      "book_detail": "Test"
-      "borrowed": 0
-      "create_datetime": "2017-05-28 16:14:59"
-      "current_user": "0"
-    };
-    {
-      "book_id": 2,
-      "book_name": "The Last Guardian",
-      "book_detail": "Test"
-      "borrowed": 1
-      "create_datetime": "2017-05-30 13:09:09"
-      "current_user": "0"
-    }
-    
-*** ERRORS ***
-
-| CODE | MESSAGE | IMPLEMENT |
-|:-------------:|:-------------|
-| 404 | Couldn't find any book | No books |
-
-####About other error codes，view Error List Below.
-
----
-
-
-## GET books/id
-
----
-
-Get Specific Book Information
-
-##### Authorization
-
----
-
-No
-
-##### Parameters
-
----
-
-None
-
-##### METHOD
-
----
-
-GET
-
-##### EXAMPLE
-
----
-
-` ``
-GET index.php/books/2
-` 
-
-##### RESULT
-
----
-
-*** JSON EXAMPLE ***
-
-    {
-      "book_id": "2",
-      "book_name": "Digital Castles",
-      "book_detail": "test",
-      "borrowed": "0",
-      "create_datetime": "2017-05-28 16:14:59"
-      "current_user": "0"
-    }
-
-*** ERRORS ***
-
-| CODE | MESSAGE | IMPLEMENT |
-|:-------------:|:-------------|
-| 404 | Book could not be found | Invalid Book ID |
-
-####About other error codes，view Error List Below.
-
----
-
-## POST books/
-
----
-
-POST(Create) New Book Information
-
-##### Authorization
-
----
-
-Yes
-
-##### Parameters
-
----
-
-| NAME | REQUIRED | TYPE | IMPLEMENT |
-|:-------------:|:-------------|:-------------|:-------------|
-| book_name | true | int | Book ID |
-| book_category | true | varchar | Book category |
-| book_detail | true | varchar | Book detail |
-
-##### METHOD
-
----
-
-POST
-
-##### EXAMPLE
-
----
-
-    POST index.php/books/
-
-*** JSON EXAMPLE ***
-
-    {
-      "book_name": "The Last Guardian",
-      "book_category": "novel",
-      "book_detail": "test"
-    }
-
-##### RESULT
-
----
-
-*** JSON EXAMPLE ***
-
-    {
-      "book_id": 3,
-      "book_name": "The Last Guardian",
-      "book_category": "novel",
-      "book_detail": "Test"
-      "borrowed": 0
-      "create_datetime": "2010/1/1"
-      "current_user": "0"
-    }
-
-*** ERRORS ***
-
-| CODE | MESSAGE | IMPLEMENT |
-|:-------------:|:-------------|
-| 400 | Cannot post with certain id | Please post without ID|
-| 401 | Unauthorized | Need login |
-
-####About other error codes，view Error List Below.
-
----
-
-## PUT books/id
-
----
-
-PUT Specific Book Information
-
-##### Authorization
-
----
-
-Yes
-
-##### Parameters
-
----
-
-| NAME | REQUIRED | TYPE | IMPLEMENT |
-|:-------------:|:-------------|:-------------|:-------------|
-| book_name | false | int | Book Name |
-| book_detail | false | varchar | Book detail |
-| book_category | false | varchar | Book category |
-| borrowed | false | bit | Borrow status |
-
-##### METHOD
-
----
-
-PUT
-
-##### EXAMPLE
-
----
-
-` ``
-PUT index.php/books/1
-` 
-
-*** JSON EXAMPLE ***
-
-    {
-      "book_name": "Gone with the wind"
-      "book_category": "novel"
-      "book_detail": "Test1"
-      "borrowed": true
-    }
-
-
-##### RESULT
-
----
-
-*** JSON EXAMPLE ***
-
-    {
-      "book_id": 1
-      "book_name": "Gone with the wind"
-      "book_detail": "Test1"
-      "borrowed": "1"
-      "create_datetime": "2017/5/25"
-      "current_user": "2"
-    }
-
-*** ERRORS ***
-
-| CODE | MESSAGE | IMPLEMENT |
-|:-------------:|:-------------|
-| 400 | Must put with ID | Must put with ID |
-| 401 | Unauthorized | Need login |
-| 404 | Book could not be found | Invalid book ID |
-
-####About other error codes，view Error List Below.
-
----
-
-## DELETE books/id
-
----
-
-DELETE Specific Book Information
-
-##### Authorization
-
----
-
-Yes
-
-##### Parameters
-
----
-
-None
-
-##### METHOD
-
----
-
-DELETE
-
-##### EXAMPLE
-
----
-
-` ``
-DELETE index.php/books/1
-` 
-
-
-##### RESULT
-
----
-
-*** JSON EXAMPLE ***
-
-    {   
-      "message": "Delete OK!"
-    }
-
-
-*** ERRORS ***
-
-| CODE | MESSAGE | IMPLEMENT |
-|:-------------:|:-------------|
-| 400 | An ID must be supplied to delete a book | Add ID |
-| 401 | Unauthorized | Need login |
-| 404 | Book could not be found | Invalid book ID |
-
-####About other error codes，view Error List Below.
-
----
-
-## GET records/
-
----
-
-Get All Borrow Record Information
-
-##### Authorization
-
----
-
-No
-
-##### Parameters
-
----
-
-No Parameters
-
-##### METHOD
-
----
-
-GET
-
-##### EXAMPLE
-
----
-
-    GET index.php/records
-
-##### RESULT
-
----
-
-*** JSON EXAMPLE ***
-
-    
-    {
-      "record_id": "1",
-      "user_id": "1",
-      "book_id": "1",
-      "status": "1",
-      "create_datetime": "2017-06-11 13:19:37",
-      "return_datetime": null
+```
+{
+    id: '123',
+    name: "miaomiao",
+    coverr_url: "http://img4.duitang.com/uploads/item/201404/15/20140415093826_SzcNe.thumb.700_0.jpeg",
+    singer: {
+        id: '1',
+        name: 'adyden'
     },
-    {
-      "record_id": "2",
-      "user_id": "1",
-      "book_id": "2",
-      "status": "1",
-      "create_datetime": "2017-06-11 13:19:46",
-      "return_datetime": null
-    }
-    
-*** ERRORS ***
-
-| CODE | MESSAGE | IMPLEMENT |
-|:-------------:|:-------------|
-| 404 | Couldn't find any record | No records |
-
-####About other error codes，view Error List Below.
-
----
-
-
-## GET books/id/records
-
----
-
-Get Specific Book's Record Information
-
-##### Authorization
-
----
-
-No
-
-##### Parameters
-
----
-
-None
-
-##### METHOD
-
----
-
-GET
-
-##### EXAMPLE
-
----
-
-` ``
-GET index.php/books/1/records
-` 
-
-##### RESULT
-
----
-
-*** JSON EXAMPLE ***
-
-    {
-      "record_id": "1",
-      "user_id": "1",
-      "book_id": "1",
-      "status": "1",
-      "create_datetime": "2017-06-11 13:19:37",
-      "return_datetime": null
-    }
-
-*** ERRORS ***
-
-| CODE | MESSAGE | IMPLEMENT |
-|:-------------:|:-------------|
-| 404 | Book could not be found | Invalid book ID |
-
-####About other error codes，view Error List Below.
-
----
-
-## POST books/id/records
-
----
-
-POST(Create) New Record(Borrow) Information
-
-##### Authorization
-
----
-
-Yes
-
-##### Parameters
-
----
-
-none
-
-##### METHOD
-
----
-
-POST
-
-##### EXAMPLE
-
----
-
-    POST index.php/books/1/borrow
-
-##### RESULT
-
----
-
-*** JSON EXAMPLE ***
-
-    {
-        "record_id": "19",
-        "user_id": "5",
-        "book_id": "1",
-        "status": "1",
-        "create_datetime": "2017-06-13 17:41:05",
-        "return_datetime": null
-    }
-
-*** ERRORS ***
-
-| CODE | MESSAGE | IMPLEMENT |
-|:-------------:|:-------------|
-| 400 | The book is already borrowed | Already borrowed |
-
-
-####About other error codes，view Error List Below.
-
----
-
-## POST books/id/return
-
----
-
-POST(Create) New Record(Return) Information
-
-##### Authorization
-
----
-
-Yes
-
-##### Parameters
-
----
-
-none
-
-
-##### METHOD
-
----
-
-POST
-
-##### EXAMPLE
-
----
-
-` ``
-POST index.php/books/1/return
-` 
-
-*** JSON EXAMPLE ***
-
-##### RESULT
-
----
-
-*** JSON EXAMPLE ***
-
-    {
-        "record_id": "20",
-        "user_id": "5",
-        "book_id": "1",
-        "status": "1",
-        "create_datetime": "0000-00-00 00:00:00",
-        "return_datetime": "2017-06-13 18:30:24"
-    }
-
-*** ERRORS ***
-
-| CODE | MESSAGE | IMPLEMENT |
-|:-------------:|:-------------|
-| 400 | The book is already returned | Already returned |
-
-####About other error codes，view Error List Below.
-
----
-
-## GET books/categories/
-
----
-
-Get All Category Information
-
-##### Authorization
-
----
-
-No
-
-##### Parameters
-
----
-
-No Parameters
-
-##### METHOD
-
----
-
-GET
-
-##### EXAMPLE
-
----
-
-    GET index.php/books/categories
-
-##### RESULT
-
----
-
-*** JSON EXAMPLE ***
-    
-    {
-        "category_name": "dict"
+    composer: {
+        id: '3',
+        name: 'fuck'
     },
-    {
-        "category_name": "index"
+    lyricist: {
+        id: '3',
+        name: 'fuck',
     },
-    {
-        "category_name": "novel"
+    lyric_url: "https://api.darlin.me/music/lyric/12/",
+    album: {
+        id: '5',
+        name: 'album test',
+        cover_url: "",
+        songs_num: 12,
     },
-    {
-        "category_name": "teach"
-    }
-    
-*** ERRORS ***
+    src: "http://data.5sing.kgimg.com/G104/M09/1C/1D/qA0DAFk1fVGAGWkMAOMuQpygo8g155.mp3",
+    published_at: "2009-01-17T20:14:40Z",
+}
+```
 
-| CODE | MESSAGE | IMPLEMENT |
-|:-------------:|:-------------|
-| 404 | No categories | No categories |
+### 上传新音乐
+**注意，这个需要验证管理员权限**
+POST /music
+#### 传入参数
+|参数名| 类型 | 必须 | 默认 | 说明|
+|:--|:--|:--|:--|:--|
+|name|string|true|-|歌名|
+| cover_url | string | false | 默认图片url | 封面图片路径 |
+|singer|object|true|-|演唱者|
+|composer_id|int|false| null |作曲者|
+|lyricist_id|int|false| null |作词者|
+| lyric_url | string |false| null |歌词请求url |
+| album | object | false | null |所属专辑 |
+| src_url | string | true | - | 音频资源路径 |
+| published_at | string | true | - |  UTC时间(2009-01-17T20:14:40Z) |
 
-####About other error codes，view Error List Below.
-
-## GET categories/name
-
----
-
-Get Specific Category Information
-
-##### Authorization
-
----
-
-No
-
-##### Parameters
-
----
-
-None
-
-##### METHOD
-
----
-
-GET
-
-##### EXAMPLE
-
----
-
-` ``
-GET index.php/categories/novel
-` 
-
-##### RESULT
-
----
-
-*** JSON EXAMPLE ***
-
-    {
-        "book_id": "1",
-        "book_name": "Guardian1",
-        "book_category": "novel",
-        "book_detail": "test1111",
-        "borrowed": "1",
-        "create_datetime": "2017-06-11 13:42:18"
-        "current_user": "1"
+#### 返回值
+|参数名|类型|说明|
+|:--|:--|:--|
+|id|int|音乐id|
+|name|string|歌名|
+| cover_url | string | 封面图片路径 |
+|singer|object|演唱者|
+|composer|object|作曲者|
+|lyricist|object|作词者|
+| lyric_url | string | 歌词请求url |
+| album | object | 所属专辑 |
+| src_url | string | 音频资源路径 |
+| published_at | string | UTC时间(2009-01-17T20:14:40Z) |
+#### 例子
+```
+{
+    id: '123',
+    name: "miaomiao",
+    coverr_url: "http://img4.duitang.com/uploads/item/201404/15/20140415093826_SzcNe.thumb.700_0.jpeg",
+    singer: {
+        id: '1',
+        name: 'adyden'
     },
-    {
-        "book_id": "2",
-        "book_name": "Guardian",
-        "book_category": "novel",
-        "book_detail": "test",
-        "borrowed": "0",
-        "create_datetime": "2017-06-11 13:42:32"
-        "current_user": "1"  
-    }
+    composer: {
+        id: '3',
+        name: 'fuck'
+    },
+    lyricist: {
+        id: '3',
+        name: 'fuck',
+    },
+    lyric_url: "https://api.darlin.me/music/lyric/12/",
+    album: {
+        id: '5',
+        name: 'album test',
+        cover_url: "",
+        songs_num: 12,
+    },
+    src: "http://data.5sing.kgimg.com/G104/M09/1C/1D/qA0DAFk1fVGAGWkMAOMuQpygo8g155.mp3",
+    published_at: "2009-01-17T20:14:40Z",
+}
+```
 
-*** ERRORS ***
+## 待补充
+PUT /music/:id      修改歌曲信息(管理员权限) 
+DELETE /music/:id   删除歌曲信息(管理员权限)
 
-| CODE | MESSAGE | IMPLEMENT |
-|:-------------:|:-------------|
-| 404 | Category could not be found | Invalid category |
+GET /lyrics        获取歌词列表(需要提供分页和filed以及是否审核三个功能)
+GET /lyrics/:id    获取歌词对象信息(数据格式找我要)
+POST /lyrics       上传歌词(数据格式找我要)
+PUT /lyrics/:id    修改歌词对象
+DELETE /lyrics/:id 删除歌词(管理员权限)
+POST /lyrics/:id/approve  审核歌词(管理员权限)
 
-####About other error codes，view Error List Below.
+GET /users/:id/collections  获取某用户的收藏(需要提供分页)
+POST /music/:id/collect     用户添加歌曲到收藏
+POST /music/:id/review      用户评论歌曲
