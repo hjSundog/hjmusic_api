@@ -68,6 +68,7 @@ POST /users/signin 对数据库进行身份验证，并将其重定向到新的�
     
 ### 获取用户信息
 GET /users 获取所有注册用户信息 (需要提供分页和filed两个功能)
+
 GET /users/:id 获取id用户信息
 #### 传入参数
 空
@@ -97,7 +98,9 @@ GET /users/:id 获取id用户信息
 ## Music
 ### 获取音乐情况
 **注意，所有演唱作曲作词都是音乐人，作为一个类型的对象。**
+
 GET /music
+
 GET /music/:id
 #### 传入参数
 |参数名|说明|
@@ -149,6 +152,7 @@ GET /music/:id
 
 ### 上传新音乐
 **注意，这个需要验证管理员权限**
+
 POST /music
 #### 传入参数
 |参数名| 类型 | 必须 | 默认 | 说明|
@@ -208,15 +212,28 @@ POST /music
 
 ## 待补充
 PUT /music/:id      修改歌曲信息(管理员权限) 
+
 DELETE /music/:id   删除歌曲信息(管理员权限)
 
+---
+
 GET /lyrics        获取歌词列表(需要提供分页和filed以及是否审核三个功能)
+
 GET /lyrics/:id    获取歌词对象信息(数据格式找我要)
+
 POST /lyrics       上传歌词(数据格式找我要)
+
 PUT /lyrics/:id    修改歌词对象
+
 DELETE /lyrics/:id 删除歌词(管理员权限)
+
 POST /lyrics/:id/approve  审核歌词(管理员权限)
 
+---
+
 GET /users/:id/collections  获取某用户的收藏(需要提供分页)
+
 POST /music/:id/collect     用户添加歌曲到收藏
+
 POST /music/:id/review      用户评论歌曲
+---
