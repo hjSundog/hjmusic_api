@@ -217,20 +217,46 @@ PUT /music/:id
 #### 传入参数
 |参数名|类型|必须|默认|说明|
 |:--|:--|:--|:--|:--|
-|name|string|true|-|歌名|
-| cover_url | string | false | 默认图片url | 封面图片路径 |
-|singer|object|true|-|演唱者|
+|name|string|false|null|歌名|
+| cover_url | string | false | null | 封面图片路径 |
+|singer|object|false|null|演唱者|
 |composer_id|int|false| null |作曲者|
 |lyricist_id|int|false| null |作词者|
 | lyric_url | string |false| null |歌词请求url |
 | album | object | false | null |所属专辑 |
-| src_url | string | true | - | 音频资源路径 |
-| published_at | string | true | - |  UTC时间(2009-01-17T20:14:40Z) |
+| src_url | string |false | null | 音频资源路径 |
+| published_at | string |false| null |  UTC时间(2009-01-17T20:14:40Z) |
 
-## 待补充
-PUT /music/:id      修改歌曲信息(管理员权限) 
+#### 返回值
+|参数名|类型|说明|
+|:--|:--|:--|
+|id|int|音乐id|
+|name|string|歌名|
+| cover_url | string | 封面图片路径 |
+|singer|object|演唱者|
+|composer|object|作曲者|
+|lyricist|object|作词者|
+| lyric_url | string | 歌词请求url |
+| album | object | 所属专辑 |
+| src_url | string | 音频资源路径 |
+| published_at | string | UTC时间(2009-01-17T20:14:40Z) |
 
-DELETE /music/:id   删除歌曲信息(管理员权限)
+### 删除歌曲信息
+**注意，这个需要管理员权限**
+
+DELETE /music/:id
+#### 传入参数
+|参数名|说明|
+|:--|:--|
+|-|-|
+
+#### 返回响应状态（删除成功）
+返回HTTP状态码204
+
+#### 返回响应状态（删除失败）
+歌曲(id)不存在：返回HTTP状态码404
+用户权限不够：返回HTTP状态码403
+
 
 ---
 
