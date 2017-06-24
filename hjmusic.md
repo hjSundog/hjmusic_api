@@ -210,6 +210,23 @@ POST /music
 }
 ```
 
+### 修改歌曲信息
+**注意，这个需要验证管理员权限**
+
+PUT /music/:id
+#### 传入参数
+|参数名|类型|必须|默认|说明|
+|:--|:--|:--|:--|:--|
+|name|string|true|-|歌名|
+| cover_url | string | false | 默认图片url | 封面图片路径 |
+|singer|object|true|-|演唱者|
+|composer_id|int|false| null |作曲者|
+|lyricist_id|int|false| null |作词者|
+| lyric_url | string |false| null |歌词请求url |
+| album | object | false | null |所属专辑 |
+| src_url | string | true | - | 音频资源路径 |
+| published_at | string | true | - |  UTC时间(2009-01-17T20:14:40Z) |
+
 ## 待补充
 PUT /music/:id      修改歌曲信息(管理员权限) 
 
