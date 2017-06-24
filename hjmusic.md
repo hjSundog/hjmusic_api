@@ -250,14 +250,86 @@ DELETE /music/:id
 |:--|:--|
 |-|-|
 
-#### 返回响应状态（删除成功）
-返回HTTP状态码204
+#### 返回HTTP响应状态
+成功：
+    删除成功：204
+				
+失败：
+    歌曲(id)不存在：404
+    用户权限不够：403
 
-#### 返回响应状态（删除失败）
-歌曲(id)不存在：返回HTTP状态码404
-用户权限不够：返回HTTP状态码403
 
+## 收藏
 
+### 获取某用户的收藏（需要提供分页）
+
+GET /users/:id/collections
+#### 传入参数
+|参数名|说明|
+|--|--|
+|-|-|
+
+#### 返回值
+|参数名|类型|说明|
+|:--|:--|:--|
+|id|int|音乐id|
+|name|string|歌名|
+| cover_url | string | 封面图片路径 |
+|singer|object|演唱者|
+|composer|object|作曲者|
+|lyricist|object|作词者|
+| lyric_url | string | 歌词请求url |
+| album | object | 所属专辑 |
+| src_url | string | 音频资源路径 |
+| published_at | string | UTC时间(2009-01-17T20:14:40Z) |
+
+#### 例子
+```
+{
+    id: '123',
+    name: "miaomiao",
+    coverr_url: "http://img4.duitang.com/uploads/item/201404/15/20140415093826_SzcNe.thumb.700_0.jpeg",
+    singer: {
+        id: '1',
+        name: 'adyden'
+    },
+    composer: {
+        id: '3',
+        name: 'fuck'
+    },
+    lyricist: {
+        id: '3',
+        name: 'fuck',
+    },
+    lyric_url: "https://api.darlin.me/music/lyric/12/",
+    album: {
+        id: '5',
+        name: 'album test',
+        cover_url: "",
+        songs_num: 12,
+    },
+    src: "http://data.5sing.kgimg.com/G104/M09/1C/1D/qA0DAFk1fVGAGWkMAOMuQpygo8g155.mp3",
+    published_at: "2009-01-17T20:14:40Z",
+}
+```
+
+### 用户添加歌曲到收藏
+
+POST /music/:id/collect
+#### 传入参数
+|参数名|类型|说明|
+|--|--|--|
+|id|int|用户id|
+
+### 返回HTTP响应状态
+成功：
+    收藏成功：204
+
+失败：
+    歌曲不存在：404
+    歌曲已收藏：409
+
+				
 ---
 
 GET /lyrics        获取歌词列表(需要提供分页和filed以及是否审核三个功能)
@@ -273,10 +345,6 @@ DELETE /lyrics/:id 删除歌词(管理员权限)
 POST /lyrics/:id/approve  审核歌词(管理员权限)
 
 ---
-
-GET /users/:id/collections  获取某用户的收藏(需要提供分页)
-
-POST /music/:id/collect     用户添加歌曲到收藏
 
 POST /music/:id/review      用户评论歌曲
 ---
