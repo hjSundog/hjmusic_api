@@ -241,6 +241,36 @@ PUT /music/:id
 | src_url | string | 音频资源路径 |
 | published_at | string | UTC时间(2009-01-17T20:14:40Z) |
 
+#### 例子
+```
+{
+    id: '123',
+    name: "miaomiao",
+    coverr_url: "http://img4.duitang.com/uploads/item/201404/15/20140415093826_SzcNe.thumb.700_0.jpeg",
+    singer: {
+        id: '1',
+        name: 'adyden'
+    },
+    composer: {
+        id: '3',
+        name: 'fuck'
+    },
+    lyricist: {
+        id: '3',
+        name: 'fuck',
+    },
+    lyric_url: "https://api.darlin.me/music/lyric/12/",
+    album: {
+        id: '5',
+        name: 'album test',
+        cover_url: "",
+        songs_num: 12,
+    },
+    src: "http://data.5sing.kgimg.com/G104/M09/1C/1D/qA0DAFk1fVGAGWkMAOMuQpygo8g155.mp3",
+    published_at: "2009-01-17T20:14:40Z",
+}
+```
+
 ### 删除歌曲信息
 **注意，这个需要管理员权限**
 
@@ -321,13 +351,13 @@ POST /music/:id/collect
 |--|--|--|
 |id|int|用户id|
 
-### 返回HTTP响应状态
+#### 返回HTTP响应状态
 成功：
     收藏成功：204
 
 失败：
     歌曲不存在：404
-    歌曲已收藏：409
+    歌曲已收藏：409
 
 				
 ---
