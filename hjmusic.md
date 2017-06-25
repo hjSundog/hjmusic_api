@@ -283,7 +283,7 @@ DELETE /music/:id
 #### 返回HTTP响应状态
 * 成功
   * 删除成功：204
-				
+                
 * 失败：
   * 歌曲(id)不存在：404  
   * 用户权限不够：403  
@@ -302,44 +302,81 @@ GET /users/:id/collections
 #### 返回值
 |参数名|类型|说明|
 |:--|:--|:--|
-|id|int|音乐id|
-|name|string|歌名|
-| cover_url | string | 封面图片路径 |
-|singer|object|演唱者|
-|composer|object|作曲者|
-|lyricist|object|作词者|
-| lyric_url | string | 歌词请求url |
-| album | object | 所属专辑 |
-| src_url | string | 音频资源路径 |
-| published_at | string | UTC时间(2009-01-17T20:14:40Z) |
+|id|int|收藏id|
+|collect_at|string|收藏事件UTC|
+|music|object|music对象|
 
 #### 例子
 ```
 {
-    id: '123',
-    name: "miaomiao",
-    coverr_url: "http://img4.duitang.com/uploads/item/201404/15/20140415093826_SzcNe.thumb.700_0.jpeg",
-    singer: {
-        id: '1',
-        name: 'adyden'
-    },
-    composer: {
-        id: '3',
-        name: 'fuck'
-    },
-    lyricist: {
-        id: '3',
-        name: 'fuck',
-    },
-    lyric_url: "https://api.darlin.me/music/lyric/12/",
-    album: {
-        id: '5',
-        name: 'album test',
-        cover_url: "",
-        songs_num: 12,
-    },
-    src: "http://data.5sing.kgimg.com/G104/M09/1C/1D/qA0DAFk1fVGAGWkMAOMuQpygo8g155.mp3",
-    published_at: "2009-01-17T20:14:40Z",
+    data: [
+        {
+            id: 12,
+            collect_at: "published_at: "2009-01-17T20:14:40Z",
+            music: {
+                id: '123',
+                name: "miaomiao",
+                coverr_url: "http://img4.duitang.com/uploads/item/201404/15/20140415093826_SzcNe.thumb.700_0.jpeg",
+                singer: {
+                    id: '1',
+                    name: 'adyden'
+                },
+                composer: {
+                    id: '3',
+                    name: 'fuck'
+                },
+                lyricist: {
+                    id: '3',
+                    name: 'fuck',
+                },
+                lyric_url: "https://api.darlin.me/music/lyric/12/",
+                album: {
+                    id: '5',
+                    name: 'album test',
+                    cover_url: "",
+                    songs_num: 12,
+                },
+                src: "http://data.5sing.kgimg.com/G104/M09/1C/1D/qA0DAFk1fVGAGWkMAOMuQpygo8g155.mp3",
+                published_at: "2009-01-17T20:14:40Z",    
+            }
+        }, {
+            id: 12,
+            collect_at: "published_at: "2009-01-17T20:14:40Z",
+            music: {
+                id: '123',
+                name: "miaomiao",
+                coverr_url: "http://img4.duitang.com/uploads/item/201404/15/20140415093826_SzcNe.thumb.700_0.jpeg",
+                singer: {
+                    id: '1',
+                    name: 'adyden'
+                },
+                composer: {
+                    id: '3',
+                    name: 'fuck'
+                },
+                lyricist: {
+                    id: '3',
+                    name: 'fuck',
+                },
+                lyric_url: "https://api.darlin.me/music/lyric/12/",
+                album: {
+                    id: '5',
+                    name: 'album test',
+                    cover_url: "",
+                    songs_num: 12,
+                },
+                src: "http://data.5sing.kgimg.com/G104/M09/1C/1D/qA0DAFk1fVGAGWkMAOMuQpygo8g155.mp3",
+                published_at: "2009-01-17T20:14:40Z",    
+            }
+        }
+    ],
+    paging: {
+        first: "https://api.darlin.me/user/1/collections?offset=0&limit=5",
+        previous: "https://api.darlin.me/user/1/collections?offset=5&limit=5",
+        next: "https://api.darlin.me/user/1/collections?offset=10&limit=5",
+        final: "https://api.darlin.me/user/1/collections?offset=35&limit=5",
+    }
+    
 }
 ```
 
@@ -359,7 +396,7 @@ POST /music/:id/collect
   * 歌曲不存在：404  
   * 歌曲已收藏：409  
 
-				
+                
 ---
 
 GET /lyrics        获取歌词列表(需要提供分页和filed以及是否审核三个功能)
