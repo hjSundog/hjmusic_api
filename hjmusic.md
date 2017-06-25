@@ -312,34 +312,83 @@ GET /users/:id/collections
 | album | object | 所属专辑 |
 | src_url | string | 音频资源路径 |
 | published_at | string | UTC时间(2009-01-17T20:14:40Z) |
+| collected_at | string | 歌曲收藏时间 |
+| paging | string | 分页信息 |
+| first | string | 首页地址 |
+| previous | string | 上一页地址 |
+| next | string | 下一页地址 |
+| last | string | 最后一页地址 |
 
 #### 例子
 ```
 {
-    id: '123',
-    name: "miaomiao",
-    coverr_url: "http://img4.duitang.com/uploads/item/201404/15/20140415093826_SzcNe.thumb.700_0.jpeg",
-    singer: {
-        id: '1',
-        name: 'adyden'
+    {
+        'id': '123',
+        'name': "miaomiao",
+        'coverr_url': "http://img4.duitang.com/uploads/item/201404/15/20140415093826_SzcNe.thumb.700_0.jpeg",
+        'singer': {
+            'id': '1',
+            'name': 'adyden'
+        },
+        'composer': {
+            'id': '3',
+            'name': 'fuck'
+        },
+        'lyricist': {
+            'id': '3',
+            'name': 'fuck',
+        },
+        'lyric_url': "https://api.darlin.me/music/lyric/12/",
+        'album': {
+            'id': '5',
+            'name': 'album test',
+            'cover_url': "",
+            'songs_num': 12,
+        },
+        'paging':{
+            "first":"https://api.darlin.me/user/1/collections?offset=0&limit=5",
+            "previous":"https://api.darlin.me/user/1/collections?offset=6&limit=5",
+            "next":"https://api.darlin.me/user/1/collections?offset=12&limit=5",
+            "final":"https://api.darlin.me/user/1/collections?offset=18&limit=2"
+        },
+        src: "http://data.5sing.kgimg.com/G104/M09/1C/1D/qA0DAFk1fVGAGWkMAOMuQpygo8g155.mp3",
+        published_at: "2009-01-17T20:14:40Z",
+        collected_at: "2011-01-01T20:14:40Z"
     },
-    composer: {
-        id: '3',
-        name: 'fuck'
+    {
+        'id': '158',
+        'name': "xiaochao",
+        'coverr_url': "http://img4.duitang.com/uploads/item/201404/15/20140415093826_SzcNe.thumb.700_0.jpeg",
+        'singer': {
+            'id': '2',
+            'name': 'taotao'
+        },
+        'composer': {
+            'id': '3',
+            'name': 'fuck'
+        },
+        'lyricist': {
+            'id': '3',
+            'name': 'fuck',
+        },
+        lyric_url: "https://api.darlin.me/music/lyric/13/",
+        'album': {
+            'id': '5',
+            'name': 'album test',
+            'cover_url': "",
+            'songs_num': 13,
+        },
+        'paging':{
+            "first":"https://api.darlin.me/user/1/collections?offset=0&limit=5",
+            "previous":"https://api.darlin.me/user/1/collections?offset=6&limit=5",
+            "next":"https://api.darlin.me/user/1/collections?offset=12&limit=5",
+            "final":"https://api.darlin.me/user/1/collections?offset=18&limit=2"
+        },
+        'src': "http://data.5sing.kgimg.com/G104/M09/1C/1D/qA0DAFk1fVGAGWkMAOMuQpygo8g155.mp3",
+        'published_at': "2009-01-17T20:14:40Z",
+        'collected_at': "2011-01-01T20:14:40Z"
     },
-    lyricist: {
-        id: '3',
-        name: 'fuck',
-    },
-    lyric_url: "https://api.darlin.me/music/lyric/12/",
-    album: {
-        id: '5',
-        name: 'album test',
-        cover_url: "",
-        songs_num: 12,
-    },
-    src: "http://data.5sing.kgimg.com/G104/M09/1C/1D/qA0DAFk1fVGAGWkMAOMuQpygo8g155.mp3",
-    published_at: "2009-01-17T20:14:40Z",
+    ……
 }
 ```
 
