@@ -541,11 +541,11 @@ GET /lyrics/:id
         published_at: "2009-01-17T20:14:40Z",    
     },
     uploader:  {
-        "id": 3,
-        "username": "lwio",
-        "realname": "keke",
-        "email": "443474713@qq.com",
-        "auth": "admin",
+        id: 3,
+        username: "lwio",
+        realname: "keke",
+        email: "443474713@qq.com",
+        auth: "admin",
     },
 }
 ```
@@ -570,17 +570,42 @@ POST /lyrics
 #### 例子
 ```Json
 {
-  'id':'123',
-  'music':{
-    'id':'3',
-    'name':'fuck'
-  },
-  'uploader':{
-    'id':'342',
-    'name':'fuck'
-  },
-  'uploader_at':'2009-01-17T20:14:40Z',
-  'lyric':'在我心中，曾经有一个梦'
+    id: 12,
+    uploaded_at: "published_at: "2009-01-17T20:14:40Z",
+    lyric: "afeihoIFIOEHOIefooqihfoIHFOoifoehqofhqoiefoihqfoOHOIqefofhoqfehoqfhoqe",
+    music: {
+        id: '123',
+        name: "miaomiao",
+        coverr_url: "http://img4.duitang.com/uploads/item/201404/15/20140415093826_SzcNe.thumb.700_0.jpeg",
+        singer: {
+            id: '1',
+            name: 'adyden'
+        },
+        composer: {
+            id: '3',
+            name: 'fuck'
+        },
+        lyricist: {
+            id: '3',
+            name: 'fuck',
+        },
+        lyric_url: "https://api.darlin.me/music/lyric/12/",
+        album: {
+            id: '5',
+            name: 'album test',
+            cover_url: "",
+            songs_num: 12,
+        },
+        src: "http://data.5sing.kgimg.com/G104/M09/1C/1D/qA0DAFk1fVGAGWkMAOMuQpygo8g155.mp3",
+        published_at: "2009-01-17T20:14:40Z",    
+    },
+    uploader:  {
+        id: 3,
+        username: "lwio",
+        realname: "keke",
+        email: "443474713@qq.com",
+        auth: "admin",
+    },
 }
 ```
 
