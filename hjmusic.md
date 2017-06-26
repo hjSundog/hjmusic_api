@@ -68,10 +68,37 @@ POST /users/signin 对数据库进行身份验证，并将其重定向到新的�
     
 ### 获取用户信息
 GET /users 获取所有注册用户信息 (需要提供分页和filed两个功能)
+#### 传入参数
+可以提供offset和limit以及filed
+```
+{
+    data: [
+        {
+            "id": 3,
+            "username": "lwio",
+            "realname": "keke",
+            "email": "443474713@qq.com",
+            "auth": "admin",
+        },{
+            "id": 4,
+            "username": "lwio",
+            "realname": "keke",
+            "email": "443474713@qq.com",
+            "auth": "admin",
+        },
+    ],
+    paging: {
+        first: "https://api.darlin.me/user/1/collections?offset=0&limit=5",
+        previous: "https://api.darlin.me/user/1/collections?offset=5&limit=5",
+        next: "https://api.darlin.me/user/1/collections?offset=10&limit=5",
+        final: "https://api.darlin.me/user/1/collections?offset=35&limit=5",
+    }
+}
+```
 
 GET /users/:id 获取id用户信息
 #### 传入参数
-空
+可以提供filed
 
 #### 返回值
 
@@ -376,7 +403,6 @@ GET /users/:id/collections
         next: "https://api.darlin.me/user/1/collections?offset=10&limit=5",
         final: "https://api.darlin.me/user/1/collections?offset=35&limit=5",
     }
-    
 }
 ```
 
@@ -396,10 +422,9 @@ POST /music/:id/collect
   * 歌曲不存在：404  
   * 歌曲已收藏：409  
 
-
-###获取歌词列表
+## 歌词
+### 获取歌词列表
 **需要提供分页和filed以及是否审核三个功能**
-#### HTTP Request
 GET /lyrics
 #### 传入参数
 |参数名|必须|说明|
@@ -412,22 +437,57 @@ GET /lyrics
 | id | int | 歌词id |
 | music | object | 歌曲名 |
 | uploader | object | 上传者 |
-| uploader_at | datetime | 上传时间 |
+| uploaded_at | datetime | 上传时间 |
 | lyric | text | 歌词内容 |
 #### 例子
 ```Json
 {
-  'id':'123',
-  'music':{
-    'id':'3',
-    'name':'fuck'
-  },
-  'uploader':{
-    'id':'342',
-    'name':'fuck'
-  },
-  'uploader_at':'2009-01-17T20:14:40Z',
-  'lyric':'在我心中，曾经有一个梦'
+    data: [
+        {
+            id: 12,
+            uploaded_at: "published_at: "2009-01-17T20:14:40Z",
+            lyric: "afeihoIFIOEHOIefooqihfoIHFOoifoehqofhqoiefoihqfoOHOIqefofhoqfehoqfhoqe",
+            music: {
+                id: '123',
+                name: "miaomiao",
+                coverr_url: "http://img4.duitang.com/uploads/item/201404/15/20140415093826_SzcNe.thumb.700_0.jpeg",
+                singer: {
+                    id: '1',
+                    name: 'adyden'
+                },
+                composer: {
+                    id: '3',
+                    name: 'fuck'
+                },
+                lyricist: {
+                    id: '3',
+                    name: 'fuck',
+                },
+                lyric_url: "https://api.darlin.me/music/lyric/12/",
+                album: {
+                    id: '5',
+                    name: 'album test',
+                    cover_url: "",
+                    songs_num: 12,
+                },
+                src: "http://data.5sing.kgimg.com/G104/M09/1C/1D/qA0DAFk1fVGAGWkMAOMuQpygo8g155.mp3",
+                published_at: "2009-01-17T20:14:40Z",    
+            },
+            uploader:  {
+                "id": 3,
+                "username": "lwio",
+                "realname": "keke",
+                "email": "443474713@qq.com",
+                "auth": "admin",
+            },
+        }
+    ],
+    paging: {
+        first: "https://api.darlin.me/user/1/collections?offset=0&limit=5",
+        previous: "https://api.darlin.me/user/1/collections?offset=5&limit=5",
+        next: "https://api.darlin.me/user/1/collections?offset=10&limit=5",
+        final: "https://api.darlin.me/user/1/collections?offset=35&limit=5",
+    }
 }
 ```
 ---
@@ -446,22 +506,47 @@ GET /lyrics/:id
 |id|int|歌词id|
 |music|object|歌曲|
 |uploader|object|上传者|
-|uploader_at|datetime|上传时间|
+|uploaded_at|datetime|上传时间|
 |lyric|text|歌词内容|
 #### 例子
 ```Json
 {
-  'id':'123',
-  'music':{
-    'id':'3',
-    'name':'fuck'
-  },
-  'uploader':{
-    'id':'342',
-    'name':'fuck'
-  },
-  'uploader_at':'2009-01-17T20:14:40Z',
-  'lyric':'在我心中，曾经有一个梦'
+    id: 12,
+    uploaded_at: "published_at: "2009-01-17T20:14:40Z",
+    lyric: "afeihoIFIOEHOIefooqihfoIHFOoifoehqofhqoiefoihqfoOHOIqefofhoqfehoqfhoqe",
+    music: {
+        id: '123',
+        name: "miaomiao",
+        coverr_url: "http://img4.duitang.com/uploads/item/201404/15/20140415093826_SzcNe.thumb.700_0.jpeg",
+        singer: {
+            id: '1',
+            name: 'adyden'
+        },
+        composer: {
+            id: '3',
+            name: 'fuck'
+        },
+        lyricist: {
+            id: '3',
+            name: 'fuck',
+        },
+        lyric_url: "https://api.darlin.me/music/lyric/12/",
+        album: {
+            id: '5',
+            name: 'album test',
+            cover_url: "",
+            songs_num: 12,
+        },
+        src: "http://data.5sing.kgimg.com/G104/M09/1C/1D/qA0DAFk1fVGAGWkMAOMuQpygo8g155.mp3",
+        published_at: "2009-01-17T20:14:40Z",    
+    },
+    uploader:  {
+        "id": 3,
+        "username": "lwio",
+        "realname": "keke",
+        "email": "443474713@qq.com",
+        "auth": "admin",
+    },
 }
 ```
 -----
@@ -471,10 +556,8 @@ POST /lyrics
 #### 传入参数
 |参数名|类型|必须|默认|说明|
 |:--:|:--:|:--:|:--:|:--:|
-|music|object|true|-|歌曲名|
-|uploader|object|true|null|上传者|
-|uploader_at|string|true|null|上传时间|
-|lyric|text|true|null|歌词内容|
+|music_id|int|true|-|歌曲名|
+|lyric|text|true|-|歌词内容|
 
 #### 返回值
 |参数名|类型|说明|
@@ -482,44 +565,7 @@ POST /lyrics
 |id|int|歌词id|
 |music|object|歌曲名|
 |uploader|object|上传者|
-|uploader_at|string|上传时间|
-|lyric|text|歌词内容|
-#### 例子
-```Json
-{
-  'id':'123',
-  'music':{
-    'id':'3',
-    'name':'fuck'
-  },
-  'uploader':{
-    'id':'342',
-    'name':'fuck'
-  },
-  'uploader_at':'2009-01-17T20:14:40Z',
-  'lyric':'在我心中，曾经有一个梦'
-}
-```
-
------
-
-### 修改歌词对象
-PUT /lyrics/:id    
-#### 传入参数
-|参数名|类型|必须|默认|说明|
-|:--:|:--:|:--:|:--:|:--:|
-|music|object|true|-|歌曲名|
-|uploader|object|true|null|上传者|
-|uploader_at|string|true|null|上传时间|
-|lyric|text|true|null|歌词内容|
-
-#### 返回值
-|参数名|类型|说明|
-|:--:|:--:|:--:|
-|id|int|歌词id|
-|music|object|歌曲名|
-|uploader|object|上传者|
-|uploader_at|string|上传时间|
+|uploaded_at|string|上传时间|
 |lyric|text|歌词内容|
 #### 例子
 ```Json
@@ -564,9 +610,10 @@ DELETE /lyrics/:id
 
 
 
-POST /lyrics/:id/approve  审核歌词(管理员权限)
+POST /lyrics/:id/approve  审核歌词(管理员权限) (下个版本)
 
 ---
 
-POST /music/:id/review      用户评论歌曲
+POST /music/:id/review      用户评论歌曲 (下个版本)
+
 ---
