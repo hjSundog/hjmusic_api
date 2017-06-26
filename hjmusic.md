@@ -396,18 +396,173 @@ POST /music/:id/collect
   * 歌曲不存在：404  
   * 歌曲已收藏：409  
 
+
+###获取歌词列表
+**需要提供分页和filed以及是否审核三个功能**
+#### HTTP Request
+GET /lyrics
+#### 传入参数
+|参数名|必须|说明|
+|:--|:--|:--|
+|-|-|-|
+
+#### 返回值
+| 参数名 | 类型 | 说明 |
+|:--:|:--:|:--:|
+| id | int | 歌词id |
+| music | object | 歌曲名 |
+| uploader | object | 上传者 |
+| uploader_at | datetime | 上传时间 |
+| lyric | text | 歌词内容 |
+#### 例子
+```Json
+{
+  'id':'123',
+  'music':{
+    'id':'3',
+    'name':'fuck'
+  },
+  'uploader':{
+    'id':'342',
+    'name':'fuck'
+  },
+  'uploader_at':'2009-01-17T20:14:40Z',
+  'lyric':'在我心中，曾经有一个梦'
+}
+```
+---
+ 
+### 获取歌词对象信息
+GET /lyrics/:id    
+#### 传入参数
+|参数名|类型|说明|
+|:--|:--|:--|
+|-|-|-|
+
+
+#### 返回值
+|参数名|类型|说明|
+|:--:|:--:|:--:|
+|id|int|歌词id|
+|music|object|歌曲|
+|uploader|object|上传者|
+|uploader_at|datetime|上传时间|
+|lyric|text|歌词内容|
+#### 例子
+```Json
+{
+  'id':'123',
+  'music':{
+    'id':'3',
+    'name':'fuck'
+  },
+  'uploader':{
+    'id':'342',
+    'name':'fuck'
+  },
+  'uploader_at':'2009-01-17T20:14:40Z',
+  'lyric':'在我心中，曾经有一个梦'
+}
+```
+-----
+
+### 上传歌词
+POST /lyrics     
+#### 传入参数
+|参数名|类型|必须|默认|说明|
+|:--:|:--:|:--:|:--:|:--:|
+|music|object|true|-|歌曲名|
+|uploader|object|true|null|上传者|
+|uploader_at|string|true|null|上传时间|
+|lyric|text|true|null|歌词内容|
+
+#### 返回值
+|参数名|类型|说明|
+|:--:|:--:|:--:|
+|id|int|歌词id|
+|music|object|歌曲名|
+|uploader|object|上传者|
+|uploader_at|string|上传时间|
+|lyric|text|歌词内容|
+#### 例子
+```Json
+{
+  'id':'123',
+  'music':{
+    'id':'3',
+    'name':'fuck'
+  },
+  'uploader':{
+    'id':'342',
+    'name':'fuck'
+  },
+  'uploader_at':'2009-01-17T20:14:40Z',
+  'lyric':'在我心中，曾经有一个梦'
+}
+```
+
+-----
+
+### 修改歌词对象
+PUT /lyrics/:id    
+#### 传入参数
+|参数名|类型|必须|默认|说明|
+|:--:|:--:|:--:|:--:|:--:|
+|music|object|true|-|歌曲名|
+|uploader|object|true|null|上传者|
+|uploader_at|string|true|null|上传时间|
+|lyric|text|true|null|歌词内容|
+
+#### 返回值
+|参数名|类型|说明|
+|:--:|:--:|:--:|
+|id|int|歌词id|
+|music|object|歌曲名|
+|uploader|object|上传者|
+|uploader_at|string|上传时间|
+|lyric|text|歌词内容|
+#### 例子
+```Json
+{
+  'id':'123',
+  'music':{
+    'id':'3',
+    'name':'fuck'
+  },
+  'uploader':{
+    'id':'342',
+    'name':'fuck'
+  },
+  'uploader_at':'2009-01-17T20:14:40Z',
+  'lyric':'在我心中，曾经有一个梦'
+}
+```
+
+-----
+
+### 删除歌词
+**需要管理员权限**
+DELETE /lyrics/:id 
+#### 传入参数
+|参数名|类型|说明|
+|:--|:--|:--|
+|-|-|-|
+
+
+#### 返回HTTP响应状态
+* 成功
+  * 删除成功：204
                 
+* 失败：
+  * 歌词(id)不存在：404  
+  * 用户权限不够：403  
+
+-----
+
+
 ---
 
-GET /lyrics        获取歌词列表(需要提供分页和filed以及是否审核三个功能)
 
-GET /lyrics/:id    获取歌词对象信息(数据格式找我要)
-
-POST /lyrics       上传歌词(数据格式找我要)
-
-PUT /lyrics/:id    修改歌词对象
-
-DELETE /lyrics/:id 删除歌词(管理员权限)
 
 POST /lyrics/:id/approve  审核歌词(管理员权限)
 
