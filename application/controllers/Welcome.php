@@ -20,6 +20,7 @@ class Welcome extends CI_Controller {
 	 */
 	public function index()
 	{
+		echo "123";
 		$this->load->library('email');
 		$config = array();
 		$config['useragent'] = "CodeIgniter";
