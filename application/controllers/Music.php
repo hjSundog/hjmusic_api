@@ -14,17 +14,13 @@ class Music extends REST_Controller
         header('Access-Control-Allow-Headers:*');
     }
 
-    function test_get(){
-        $a = array(array(1,2,3),array(1,2,3));
-        foreach ($a as $key=>$value){
-            $a[$key][0] = 'fuck';
-        }
-        var_dump($a);
+    function test_put(){
+        var_dump($this->_put_args);
     }
 
     /**
      * 查看音乐信息
-     * @param integer $id 音乐id
+     * @param mixed $id 音乐id
      */
     function index_get($id = null){
 
@@ -33,7 +29,7 @@ class Music extends REST_Controller
 
         //如果传入参数，则返回该id的music信息
         if (isset($id)) {
-            //判断id是否为int类型
+            //判断id是否为num类型
             $this->lawyer($id);
 
             //获取指定id的歌曲信息
@@ -60,13 +56,13 @@ class Music extends REST_Controller
                 $this->response(array('error'=>'there is no music now'),404);
             }
             else {
-                $info = $music->result_array;
+                $info = $music->result_array();
                 foreach ($info as $key => $value) {
-                    $info[$key]['singer'] = array('id'=>$info['singer_id'],'name'=>$info['singer_name']);
-                    $info[$key]['composer'] = array('id'=>$info['composer_id'],'name'=>$info['composer_name']);
-                    $info[$key]['lyricist'] = array('id'=>$info['lyricist_id'],'name'=>$info['lyricist_name']);
-                    $info[$key]['album'] = array('id'=>$info['album_id'],'name'=>$info['album_name']);
-                    $this->unset_key($value, $prisoner);
+                    $info[$key]['singer'] = array('id'=>$info[$key]['singer_id'],'name'=>$info[$key]['singer_name']);
+                    $info[$key]['composer'] = array('id'=>$info[$key]['composer_id'],'name'=>$info[$key]['composer_name']);
+                    $info[$key]['lyricist'] = array('id'=>$info[$key]['lyricist_id'],'name'=>$info[$key]['lyricist_name']);
+//                    $info[$key]['album'] = array('id'=>$info[$key]['album_id'],'name'=>$info[$key]['album_name']);
+                    $this->unset_key($info[$key], $prisoner);
                 }
                 $this->response($info);
             }
@@ -90,11 +86,11 @@ class Music extends REST_Controller
 
     /**
      * 删除音乐
-     * @param integer $id 音乐id
+     * @param mixed $id 音乐id
      * @access administrator
      */
     function index_delete($id){
-        //判断id是否为int类型
+//        判断id是否为num类型
         $this->lawyer($id);
 
         //验证管理员权限
@@ -108,16 +104,16 @@ class Music extends REST_Controller
         $this->db->query("DELETE FROM music WHERE id = {$id}") or $this->response(array('error'=>'fail to delete'),500);
 
         //返回成功信息
-        $this->response(array('success'=>'Music has been deleted'),204);
+        $this->response(null,204);
     }
 
     /**
      * 修改音乐
-     * @param integer $id 音乐id
+     * @param mixed $id 音乐id
      * @access administrator
      */
     function index_put($id){
-        //判断id是否为int类型
+        //判断id是否为num类型
         $this->lawyer($id);
 
         //验证管理员权限
@@ -135,22 +131,22 @@ class Music extends REST_Controller
                     //如果键名属于musician，则需要先判断该艺术家是否在存在与数据表之中
                     case 'singer':
                         $this->verify_musician($value);
-                        $this->db->query("UPDATE music SET singer_id = SELECT id FROM musician WHERE name = $value");
+                        $this->db->query("UPDATE music SET singer_id = (SELECT id FROM musician WHERE name =$value) WHERE id = {$id}");
                         break;
                     case 'composer':
                         $this->verify_musician($value);
-                        $this->db->query("UPDATE music SET composer_id = SELECT id FROM musician WHERE name = $value");
+                        $this->db->query("UPDATE music SET composer_id = (SELECT id FROM musician WHERE name =$value) WHERE id = {$id}");
                         break;
                     case 'lyricist':
                         $this->verify_musician($value);
-                        $this->db->query("UPDATE music SET lyricist_id = SELECT id FROM musician WHERE name = $value");
+                        $this->db->query("UPDATE music SET lyricist_id = (SELECT id FROM musician WHERE name =$value) WHERE id = {$id}");
                         break;
                     case 'album':
-                        $this->db->query("UPDATE music SET album_id = SELECT id FROM album WHERE name = $value");
+                        $this->db->query("UPDATE music SET album_id = (SELECT id FROM album WHERE name =$value) WHERE id = {$id}");
                         break;
                     default:
                         if ($value)
-                            $this->db->query("UPDATE music SET {$key} = {$value}");
+                            $this->db->query("UPDATE music SET {$key} = {$value} WHERE id = {$id}");
                         break;
                 }
             }
@@ -207,7 +203,7 @@ class Music extends REST_Controller
 
     /**
      * 返回指定id的歌曲信息
-     * @param $id integer 音乐id
+     * @param $id mixed 音乐id
      * @param $prisoner array 需要重构的数据（数组key值）
      */
     private function aim_music($id,$prisoner){
@@ -221,30 +217,31 @@ class Music extends REST_Controller
         INNER JOIN musician AS a ON music.singer_id = a.id
         INNER JOIN musician AS b ON music.composer_id = b.id
         INNER JOIN musician AS c ON music.lyricist_id = c.id
-        WHERE music.id = 1;");
+        WHERE music.id = {$id};");
 
         //判断音乐是否存在
         if (! $music->num_rows()) {
             $this->response(array(['error' => 'this music is not find']), 404);
         }
         else{
-            $info = $music->result_array;
-            $info['singer'] = array('id'=>$info['singer_id'],'name'=>$info['singer_name']);
-            $info['composer'] = array('id'=>$info['composer_id'],'name'=>$info['composer_name']);
-            $info['lyricist'] = array('id'=>$info['lyricist_id'],'name'=>$info['lyricist_name']);
-            $info['album'] = array('id'=>$info['album_id'],'name'=>$info['album_name']);
-            $this->unset_key($info, $prisoner);
+            $info = $music->result_array();
+
+            $info[0]['singer'] = array('id'=>$info[0]['singer_id'],'name'=>$info[0]['singer_name']);
+            $info[0]['composer'] = array('id'=>$info[0]['composer_id'],'name'=>$info[0]['composer_name']);
+            $info[0]['lyricist'] = array('id'=>$info[0]['lyricist_id'],'name'=>$info[0]['lyricist_name']);
+//            $info[0]['album'] = array('id'=>$info[0]['album_id'],'name'=>$info[0]['album_name']);
+            $this->unset_key($info[0], $prisoner);
             $this->response($info);
         }
     }
 
 
     /**
-     * 数据合法性判断，判断是否为integer类型
-     * @param integer $id 通过url传入的值
+     * 数据合法性判断，判断是否为num类型
+     * @param mixed $id 通过url传入的值
      */
     private function lawyer($id){
-        is_int($id) or $this->response(array('error'=>'the music id must be integer'),400);
+        is_numeric($id) or $this->response(array('error'=>'the music id must be number'),400);
     }
 
 
