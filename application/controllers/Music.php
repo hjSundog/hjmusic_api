@@ -14,8 +14,7 @@ class Music extends REST_Controller
         header('Access-Control-Allow-Headers:*');
     }
 
-    function test_put(){
-        var_dump($this->_put_args);
+    function test_get(){
     }
 
     /**
@@ -74,7 +73,31 @@ class Music extends REST_Controller
      * 上传音乐文件
      */
     function index_post(){
+        //权限验证
+        $this->verify_auth();
 
+        //加载配置文件
+        $this->config->load('upload');
+
+        //将文件重命名为加密的当前时间戳
+        $token = hash_hmac('sha256',time(),'hjmusic_key');
+
+        //配置上传参数
+        $config['upload_path']      = $this->config->item('upload_path');
+        $config['allowed_types']    = $this->config->item('allowed_types');
+        $config['max_size']         = $this->config->item('max_size');
+        $config['file_name']        = $token;
+
+        //将文件上传到临时文件夹 uploads/temp
+        $this->load->library('upload',$config);
+        if (!$this->upload->do_upload('music_file')){
+            //上传失败，返回一个被<p>标签包裹的错误信息
+            $this->response(array('error' => $this->upload->display_errors()));
+        }
+        else{
+            //文件上传成功返回文件令牌
+            $this->response(array('token'=>$token));
+        }
     }
 
     /**
@@ -184,7 +207,12 @@ class Music extends REST_Controller
     private function verify_auth(){
         $this->load->library('jwt');
         $headers = $this->input->request_headers();
-        $token = $this->jwt->decode($headers['Access-Token'],'hjmusic_key');
+        try {
+            $token = $this->jwt->decode($headers['Access-Token'], 'hjmusic_key');
+        }catch (Exception $exception){
+            $this->response(array('error'=>$exception->getMessage()),403);
+            return;
+        }
         $auth = $token->auth;
         if ($auth != 'administrator') $this->response(array('error'=>'Unauthorized'),403);
     }
