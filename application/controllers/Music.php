@@ -15,6 +15,10 @@ class Music extends REST_Controller
     }
 
     function test_get(){
+        $this->db->query('insert into foo VALUE (default,\'2ss\')');
+
+        //获取该音乐的主键id
+
     }
 
     /**
@@ -73,6 +77,10 @@ class Music extends REST_Controller
      * 上传音乐文件
      */
     function index_post(){
+        //验证是否传来文件
+        if (empty($_FILES))
+            $this->response(array('error'=>'the file can\'t be empty'),400);
+
         //权限验证
         $this->verify_auth();
 
@@ -104,6 +112,16 @@ class Music extends REST_Controller
      * 上传音乐信息
      */
     function upinfo_post(){
+        //加载配置文件
+        $this->config->load('upload');
+        $dir = $this->config->item('upload_path');
+
+        //验证文件令牌，判断文件是否存在
+        $token = $this->post('token');
+        if (!$this->verify_file($dir,$token)) $this->response(array('error'=>'not found the file'),404);
+
+        //将文件转存到music文件中，重命名为当前时间戳，且向music表插入数据时候，id也为当前时间戳
+        $data = $this->post('info');
 
     }
 
@@ -154,18 +172,18 @@ class Music extends REST_Controller
                     //如果键名属于musician，则需要先判断该艺术家是否在存在与数据表之中
                     case 'singer':
                         $this->verify_musician($value);
-                        $this->db->query("UPDATE music SET singer_id = (SELECT id FROM musician WHERE name =$value) WHERE id = {$id}");
+                        $this->db->query("UPDATE music SET singer_id = {$id} WHERE id = {$id}");
                         break;
                     case 'composer':
                         $this->verify_musician($value);
-                        $this->db->query("UPDATE music SET composer_id = (SELECT id FROM musician WHERE name =$value) WHERE id = {$id}");
+                        $this->db->query("UPDATE music SET composer_id = {$id} WHERE id = {$id}");
                         break;
                     case 'lyricist':
                         $this->verify_musician($value);
-                        $this->db->query("UPDATE music SET lyricist_id = (SELECT id FROM musician WHERE name =$value) WHERE id = {$id}");
+                        $this->db->query("UPDATE music SET lyricist_id = {$id} WHERE id = {$id}");
                         break;
                     case 'album':
-                        $this->db->query("UPDATE music SET album_id = (SELECT id FROM album WHERE name =$value) WHERE id = {$id}");
+                        $this->db->query("UPDATE music SET album_id = {$id} WHERE id = {$id}");
                         break;
                     default:
                         if ($value)
@@ -177,7 +195,7 @@ class Music extends REST_Controller
             $this->response(array('error'=>'fail to update'),500);
         }
 
-        //返回歌曲信息
+        //返回修改后的歌曲信息
         $this->aim_music($id,array('singer_id','composer_id','lyricist_id','album_id','singer_name','composer_name','lyricist_name','album_name'));
 
     }
@@ -210,7 +228,7 @@ class Music extends REST_Controller
         try {
             $token = $this->jwt->decode($headers['Access-Token'], 'hjmusic_key');
         }catch (Exception $exception){
-            $this->response(array('error'=>$exception->getMessage()),403);
+            $this->response(array('error'=>'权限验证失败！'.$exception->getMessage()),403);
             return;
         }
         $auth = $token->auth;
@@ -220,10 +238,10 @@ class Music extends REST_Controller
 
     /**
      * 判断艺术家是否存在与数据中
-     * @param $musician string 艺术家的名字
+     * @param $musician string 艺术家的id
      */
     private function verify_musician($musician){
-        $res = $this->db->query("SELECT * FROM musician WHERE name = {$musician}")->num_rows();
+        $res = $this->db->query("SELECT * FROM musician WHERE id = {$musician}")->num_rows();
         if ($res == 0)
             $this->response(array('error'=>'this musician is not exist'),404);
     }
@@ -257,7 +275,7 @@ class Music extends REST_Controller
             $info[0]['singer'] = array('id'=>$info[0]['singer_id'],'name'=>$info[0]['singer_name']);
             $info[0]['composer'] = array('id'=>$info[0]['composer_id'],'name'=>$info[0]['composer_name']);
             $info[0]['lyricist'] = array('id'=>$info[0]['lyricist_id'],'name'=>$info[0]['lyricist_name']);
-//            $info[0]['album'] = array('id'=>$info[0]['album_id'],'name'=>$info[0]['album_name']);
+            $info[0]['album'] = array('id'=>$info[0]['album_id'],'name'=>$info[0]['album_name']);
             $this->unset_key($info[0], $prisoner);
             $this->response($info);
         }
@@ -266,11 +284,48 @@ class Music extends REST_Controller
 
     /**
      * 数据合法性判断，判断是否为num类型
-     * @param mixed $id 通过url传入的值
+     * @param $id mixed 通过url传入的值
      */
     private function lawyer($id){
         is_numeric($id) or $this->response(array('error'=>'the music id must be number'),400);
     }
 
 
+    /**
+     * 判断令牌对应的文件是否存在于临时文件目录中
+     * @param $dir string 临时文件目录
+     * @param $token string 文件令牌
+     * @return true 文件存在，返回true,此时令牌名就是文件名
+     * @return false 文件不存在，返回false
+     */
+    private function verify_file($dir,$token){
+        if (is_dir($dir)){
+            if ($dh = opendir($dir)){
+                while ($file = readdir($dh) !== false){
+                    if ($file == $token){
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+
+    /**
+     * 验证前端传来的json数据的完整性
+     */
+    private function verify_json(){
+
+    }
+
+
+    /**
+     * 获取最后一次插入的数据的主键id
+     * @return mixed $id 最后一次插入的数据的id
+     */
+    private function last_insert_id(){
+        $res = $this->db->query("select last_insert_id() as id;")->result_array();
+        return $res[0]['id'];
+    }
 }
