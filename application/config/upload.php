@@ -12,3 +12,5 @@ $config['allowed_types'] = 'mp1|mp2|mp3|wma|wmv|rm|rmvb|aac|mid|wav';
 //允许上传的文件大小（还需设置php.ini文件）
 $config['max_size'] = 100;
 
+//前端在form表单中使用的文件名
+$config['file_name'] = 'music_file';

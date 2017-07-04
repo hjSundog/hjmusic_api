@@ -14,12 +14,6 @@ class Music extends REST_Controller
         header('Access-Control-Allow-Headers:*');
     }
 
-    function test_get(){
-        $this->db->query('insert into foo VALUE (default,\'2ss\')');
-
-        //获取该音乐的主键id
-
-    }
 
     /**
      * 查看音乐信息
@@ -73,57 +67,65 @@ class Music extends REST_Controller
         }
     }
 
-    /**
-     * 上传音乐文件
-     */
-    function index_post(){
-        //验证是否传来文件
-        if (empty($_FILES))
-            $this->response(array('error'=>'the file can\'t be empty'),400);
-
-        //权限验证
-        $this->verify_auth();
-
-        //加载配置文件
-        $this->config->load('upload');
-
-        //将文件重命名为加密的当前时间戳
-        $token = hash_hmac('sha256',time(),'hjmusic_key');
-
-        //配置上传参数
-        $config['upload_path']      = $this->config->item('upload_path');
-        $config['allowed_types']    = $this->config->item('allowed_types');
-        $config['max_size']         = $this->config->item('max_size');
-        $config['file_name']        = $token;
-
-        //将文件上传到临时文件夹 uploads/temp
-        $this->load->library('upload',$config);
-        if (!$this->upload->do_upload('music_file')){
-            //上传失败，返回一个被<p>标签包裹的错误信息
-            $this->response(array('error' => $this->upload->display_errors()));
-        }
-        else{
-            //文件上传成功返回文件令牌
-            $this->response(array('token'=>$token));
-        }
-    }
 
     /**
      * 上传音乐信息
      */
-    function upinfo_post(){
+    function index_post(){
+
+        //验证用户权限
+        $this->verify_auth();
+
         //加载配置文件
-        $this->config->load('upload');
-        $dir = $this->config->item('upload_path');
+        $this->config->load('Upload.php');
+        $temp_dir = $this->config->item('upload_path');
+        $music_dir = $this->config->item('music_path');
 
-        //验证文件令牌，判断文件是否存在
+        //验证文件令牌、判断文件是否存在
         $token = $this->post('token');
-        if (!$this->verify_file($dir,$token)) $this->response(array('error'=>'not found the file'),404);
+        if (empty($token))
+            $this->response(array('error'=>'token is missing'),400);
 
-        //将文件转存到music文件中，重命名为当前时间戳，且向music表插入数据时候，id也为当前时间戳
-        $data = $this->post('info');
+        if (!$this->verify_file($temp_dir,$token))
+            $this->response(array('error'=>'not found the file'),404);
 
+        //验证是否接收到json数据
+        $data = $this->post('json');
+        if (empty($data))
+            $this->response(array('error'=>'json data is missing'),400);
+        $data = json_decode($data);
+
+        //验证json数据的完整性
+        $this->verify_json($data);
+
+        //验证数据中的艺术家是否存在于musician表中
+        $this->verify_musician($data->singer_id);
+        $this->verify_musician($data->composer_id);
+        $this->verify_musician($data->lyricist_id);
+
+        ignore_user_abort(true);
+
+        //向music表插入数据
+        $field = "";
+        $f_value = "";
+        foreach ($data as $key=>$value){
+            $field .= $key.",";
+            $f_value .= "'".$value."',";
+        }
+        $field = substr($field,0,strlen($field)-1);
+        $f_value = substr($f_value,0,strlen($f_value)-1);
+        $this->db->query("INSERT INTO music ({$field}) VALUE ({$f_value})");
+
+        //获取插入音乐的id
+        $id = $this->last_insert_id();
+
+        //将文件从temp文件夹移动到music文件夹，重命名为主键id
+        $type = explode('.',$token)[1];
+        rename($temp_dir.$token,$music_dir.$id.'.'.$type) or $this->response(array('error'=>'can\'t move file'),406);
+
+        $this->response(array('success'=>'The FileInfo upload complete'),200);
     }
+
 
     /**
      * 删除音乐
@@ -148,6 +150,7 @@ class Music extends REST_Controller
         $this->response(null,204);
     }
 
+
     /**
      * 修改音乐
      * @param mixed $id 音乐id
@@ -159,7 +162,15 @@ class Music extends REST_Controller
 
         //验证管理员权限
         $this->verify_auth();
-        $data = $this->_put_args;
+
+//        $data = $this->_put_args;
+        //使用前验证是否接收到json数据
+        try {
+            $data = json_decode($this->put('json'));
+        }
+        catch (Exception $exception){
+            $this->response(array('error'=>'json data is missing'),400);
+        }
 
         //判断该音乐是否存在
         if (!$this->db->query('SELECT * FROM music WHERE id = '.$id)->num_rows())
@@ -187,7 +198,7 @@ class Music extends REST_Controller
                         break;
                     default:
                         if ($value)
-                            $this->db->query("UPDATE music SET {$key} = {$value} WHERE id = {$id}");
+                            $this->db->query("UPDATE music SET {$key} = '$value' WHERE id = {$id}");
                         break;
                 }
             }
@@ -225,10 +236,14 @@ class Music extends REST_Controller
     private function verify_auth(){
         $this->load->library('jwt');
         $headers = $this->input->request_headers();
+
+        if (empty($headers['Access-Token']))
+            $this->response(array('error'=>'Access-Token is missing'));
+
         try {
             $token = $this->jwt->decode($headers['Access-Token'], 'hjmusic_key');
         }catch (Exception $exception){
-            $this->response(array('error'=>'权限验证失败！'.$exception->getMessage()),403);
+            $this->response(array('error'=>'Authorization failed:'.$exception->getMessage()),403);
             return;
         }
         $auth = $token->auth;
@@ -238,12 +253,15 @@ class Music extends REST_Controller
 
     /**
      * 判断艺术家是否存在与数据中
-     * @param $musician string 艺术家的id
+     * @param $musician mixed 艺术家的id
      */
     private function verify_musician($musician){
-        $res = $this->db->query("SELECT * FROM musician WHERE id = {$musician}")->num_rows();
-        if ($res == 0)
-            $this->response(array('error'=>'this musician is not exist'),404);
+        try {
+            $this->db->query("SELECT * FROM musician WHERE id = {$musician->id}");
+        }
+        catch (Exception $exception){
+                $this->response(array('error' => 'this musician is not exist'), 404);
+        }
     }
 
 
@@ -275,7 +293,7 @@ class Music extends REST_Controller
             $info[0]['singer'] = array('id'=>$info[0]['singer_id'],'name'=>$info[0]['singer_name']);
             $info[0]['composer'] = array('id'=>$info[0]['composer_id'],'name'=>$info[0]['composer_name']);
             $info[0]['lyricist'] = array('id'=>$info[0]['lyricist_id'],'name'=>$info[0]['lyricist_name']);
-            $info[0]['album'] = array('id'=>$info[0]['album_id'],'name'=>$info[0]['album_name']);
+//            $info[0]['album'] = array('id'=>$info[0]['album_id'],'name'=>$info[0]['album_name']);
             $this->unset_key($info[0], $prisoner);
             $this->response($info);
         }
@@ -314,9 +332,14 @@ class Music extends REST_Controller
 
     /**
      * 验证前端传来的json数据的完整性
+     * @param $data object 解码的json数据
      */
-    private function verify_json(){
-
+    private function verify_json($data){
+        $require = array('id','name','cover_url','singer_id','composer_id','lyricist_id','src_url','published_at');
+        foreach ($require as $value){
+            if (!isset($data->{$value}))
+                $this->response(array('error'=>$value.' is require'),403);
+        }
     }
 
 
@@ -325,7 +348,7 @@ class Music extends REST_Controller
      * @return mixed $id 最后一次插入的数据的id
      */
     private function last_insert_id(){
-        $res = $this->db->query("select last_insert_id() as id;")->result_array();
+        $res = $this->db->query("SELECT LAST_INSERT_ID() AS id;")->result_array();
         return $res[0]['id'];
     }
 }
