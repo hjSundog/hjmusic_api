@@ -33,10 +33,44 @@ class Music extends REST_Controller
             $this->aim_music($id,$prisoner);
 
         }
-        //如果没有传入参数，则返回music列表
-        else{
-            //@@@待加入  分页功能
+        //如果没有传入参数，则判断是否有分页要求
+        elseif (isset($_GET['offset']) && isset($_GET['limit'])){
+            $offset = $_GET['offset'];  $this->lawyer($offset);
+            $limit = $_GET['limit'];    $this->lawyer($limit);
 
+            $music = $this->db->query("
+            SELECT 
+            music.*,
+            a.name AS singer_name,
+            b.name AS composer_name,
+            c.name AS lyricist_name
+            FROM music
+            INNER JOIN musician AS a ON music.singer_id = a.id
+            INNER JOIN musician AS b ON music.composer_id = b.id
+            INNER JOIN musician AS c ON music.lyricist_id = c.id
+            LIMIT {$offset},{$limit};");
+
+            if (!$music->num_rows())    $this->response(array('error'=>'查询的范围超出'),403);
+
+            $info = $music->result_array();
+            foreach ($info as $key => $value) {
+                $info[$key]['singer'] = array('id' => $info[$key]['singer_id'], 'name' => $info[$key]['singer_name']);
+                $info[$key]['composer'] = array('id' => $info[$key]['composer_id'], 'name' => $info[$key]['composer_name']);
+                $info[$key]['lyricist'] = array('id' => $info[$key]['lyricist_id'], 'name' => $info[$key]['lyricist_name']);
+//                $info[$key]['album'] = array('id' => $info[$key]['album_id'], 'name' => $info[$key]['album_name']);
+                $this->unset_key($info[$key], $prisoner);
+            }
+
+            $previous = $_SERVER['HTTP_HOST'].'/music'.'?offset='.($offset-$limit>0 ? $offset-$limit : 1).'&limit='.$limit;
+            $next = $_SERVER['HTTP_HOST'].'/music'.'?offset='.($offset+$limit).'&limit='.$limit;
+
+            $final_info['data'] = $info;
+            $final_info['paging'] = array('previous'=>$previous,'next'=>$next);
+
+            $this->response($final_info);
+        }
+        //没有传入分页参数，返回所有music信息
+        else{
             $music = $this->db->query("
             SELECT 
             music.*,
@@ -90,7 +124,7 @@ class Music extends REST_Controller
             $this->response(array('error'=>'not found the file'),404);
 
         //验证是否接收到json数据
-        $data = $this->post('json');
+        $data = $this->post('data');
         if (empty($data))
             $this->response(array('error'=>'json data is missing'),400);
         $data = json_decode($data);
@@ -288,13 +322,13 @@ class Music extends REST_Controller
             $this->response(array(['error' => 'this music is not find']), 404);
         }
         else{
-            $info = $music->result_array();
+            $info = $music->result_array()[0];
 
-            $info[0]['singer'] = array('id'=>$info[0]['singer_id'],'name'=>$info[0]['singer_name']);
-            $info[0]['composer'] = array('id'=>$info[0]['composer_id'],'name'=>$info[0]['composer_name']);
-            $info[0]['lyricist'] = array('id'=>$info[0]['lyricist_id'],'name'=>$info[0]['lyricist_name']);
+            $info['singer'] = array('id'=>$info['singer_id'],'name'=>$info['singer_name']);
+            $info['composer'] = array('id'=>$info['composer_id'],'name'=>$info['composer_name']);
+            $info['lyricist'] = array('id'=>$info['lyricist_id'],'name'=>$info['lyricist_name']);
 //            $info[0]['album'] = array('id'=>$info[0]['album_id'],'name'=>$info[0]['album_name']);
-            $this->unset_key($info[0], $prisoner);
+            $this->unset_key($info, $prisoner);
             $this->response($info);
         }
     }
@@ -305,7 +339,7 @@ class Music extends REST_Controller
      * @param $id mixed 通过url传入的值
      */
     private function lawyer($id){
-        is_numeric($id) or $this->response(array('error'=>'the music id must be number'),400);
+        is_numeric($id) && $id>=0 or $this->response(array('error'=>'the music id must be number or greater than zero'),400);
     }
 
 
