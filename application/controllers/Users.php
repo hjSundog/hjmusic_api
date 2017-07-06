@@ -190,6 +190,41 @@ class users extends REST_Controller
         } else
             $this->response(array('error' => 'user could not be found'), 404);
     }
+    public function collections_get($id = '',$pn = '')
+    {
+        if(empty($id)){
+            $this->response(array('error' => '用户ID不能为空'), 404);
+        }
+        //分页
+        $this->db->where('collection.user_id', $id);
+        $this->db->from('collection');
+        $all_num = $this->db->count_all_results();          //总数
+        $this->db->reset_query();
+        $page_num = 20;                                           //每页显示20条
+        $page_count =ceil($all_num/$page_num);
+        if ($page_count == 0){
+            $page_count =1;
+        }
+        if($pn > $page_count){
+            $pn = $page_count;
+        }
+        $pn         =empty($pn)?1:$pn;                    //当前页数
+        $pn         =(int)$pn;                              //安全强制转换
+        $limit_st     =($pn-1)*$page_num;                     //起始数
+        $this->db->select('music.id,music.`name`,music.cover_url,c.`name` AS singer,a.`name` AS composer,b.`name` AS lyricist,music.lyric_url,music.album_id,music.src_url,music.published_at');
+        $this->db->from('collection');
+        $this->db->join('music', 'collection.music_id = music.id');
+        $this->db->join('musician AS a','music.composer_id = a.id');
+        $this->db->join('musician AS b','music.composer_id = b.id');
+        $this->db->join('musician AS c','music.composer_id = c.id');
+        $this->db->where('collection.user_id', $id);
+        $this->db->limit($page_num,$limit_st);
+        $sql = $this->db->get()->result_array();
+        $sql['page_count']  = $page_count;
+        $sql['current_page'] = $pn;
+        $this->response($sql, 200);
+//        var_dump($sql);
+    }
 }
 
 
