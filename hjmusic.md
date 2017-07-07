@@ -130,6 +130,8 @@ GET /users/:id 获取id用户信息
 
 GET /music
 
+GET /music?offset=0?limit=5;
+
 GET /music/:id
 #### 传入参数
 |参数名|说明|
@@ -150,11 +152,15 @@ GET /music/:id
 | src_url | string | 音频资源路径 |
 | published_at | string | UTC时间(2009-01-17T20:14:40Z) |
 #### 例子
+#####返回指定id的music信息
 ```
 {
     id: '123',
     name: "miaomiao",
     coverr_url: "http://img4.duitang.com/uploads/item/201404/15/20140415093826_SzcNe.thumb.700_0.jpeg",
+    lyric_url: "https://api.darlin.me/music/lyric/12/",
+    src_url: "http://data.5sing.kgimg.com/G104/M09/1C/1D/qA0DAFk1fVGAGWkMAOMuQpygo8g155.mp3",
+    published_at: "2009-01-17T20:14:40Z",
     singer: {
         id: '1',
         name: 'adyden'
@@ -166,24 +172,129 @@ GET /music/:id
     lyricist: {
         id: '3',
         name: 'fuck',
+    }
+}
+```
+
+#####返回不带分页的所有music信息
+```
+[
+    {
+        id: '123',
+        name: "miaomiao",
+        coverr_url: "http://img4.duitang.com/uploads/item/201404/15/20140415093826_SzcNe.thumb.700_0.jpeg",
+        lyric_url: "https://api.darlin.me/music/lyric/12/",
+        src_url: "http://data.5sing.kgimg.com/G104/M09/1C/1D/qA0DAFk1fVGAGWkMAOMuQpygo8g155.mp3",
+        published_at: "2009-01-17T20:14:40Z",
+        singer: {
+            id: '1',
+            name: 'adyden'
+        },
+        composer: {
+            id: '3',
+            name: 'fuck'
+        },
+        lyricist: {
+            id: '3',
+            name: 'fuck',
+        }
     },
-    lyric_url: "https://api.darlin.me/music/lyric/12/",
-    album: {
-        id: '5',
-        name: 'album test',
-        cover_url: "",
-        songs_num: 12,
+    {
+        id: '123',
+        name: "miaomiao",
+        coverr_url: "http://img4.duitang.com/uploads/item/201404/15/20140415093826_SzcNe.thumb.700_0.jpeg",
+        lyric_url: "https://api.darlin.me/music/lyric/12/",
+        src_url: "http://data.5sing.kgimg.com/G104/M09/1C/1D/qA0DAFk1fVGAGWkMAOMuQpygo8g155.mp3",
+        published_at: "2009-01-17T20:14:40Z",
+        singer: {
+            id: '1',
+            name: 'adyden'
+        },
+        composer: {
+            id: '3',
+            name: 'fuck'
+        },
+        lyricist: {
+            id: '3',
+            name: 'fuck',
+        }
     },
-    src: "http://data.5sing.kgimg.com/G104/M09/1C/1D/qA0DAFk1fVGAGWkMAOMuQpygo8g155.mp3",
-    published_at: "2009-01-17T20:14:40Z",
+        ……
+]
+```
+
+#####返回带分页的music信息
+```
+{
+    "data": [
+        {
+            id: '123',
+            name: "miaomiao",
+            coverr_url: "http://img4.duitang.com/uploads/item/201404/15/20140415093826_SzcNe.thumb.700_0.jpeg",
+            lyric_url: "https://api.darlin.me/music/lyric/12/",
+            src_url: "http://data.5sing.kgimg.com/G104/M09/1C/1D/qA0DAFk1fVGAGWkMAOMuQpygo8g155.mp3",
+            published_at: "2009-01-17T20:14:40Z",
+            singer: {
+                id: '1',
+                name: 'adyden'
+            },
+            composer: {
+                id: '3',
+                name: 'fuck'
+            },
+            lyricist: {
+                id: '3',
+                name: 'fuck',
+            }
+        ｝,
+        {
+            id: '123',
+            name: "miaomiao",
+            coverr_url: "http://img4.duitang.com/uploads/item/201404/15/20140415093826_SzcNe.thumb.700_0.jpeg",
+            lyric_url: "https://api.darlin.me/music/lyric/12/",
+            src_url: "http://data.5sing.kgimg.com/G104/M09/1C/1D/qA0DAFk1fVGAGWkMAOMuQpygo8g155.mp3",
+            published_at: "2009-01-17T20:14:40Z",
+            singer: {
+                id: '1',
+                name: 'adyden'
+            },
+            composer: {
+                id: '3',
+                name: 'fuck'
+            },
+            lyricist: {
+                id: '3',
+                name: 'fuck',
+            }
+        }
+    ],
+    "paging": {
+        "previous": "localhost/music?offset=1&limit=2",
+        "next": "localhost/music?offset=3&limit=2"
+    }
 }
 ```
 
 ### 上传新音乐
-**注意，这个需要验证管理员权限**
+**注意，这个需要验证管理员权限**   
+**此功能提供两API，分别负责上传文件和上传文件信息**
 
+上传文件   
+POST /upload/music
+#### 传入参数
+通过post数据传输key值为music_file的音乐文件
+
+#### 返回值
+带文件后缀的加密令牌
+```
+2a68c6c1532f4bc81bf58fe68bad8e532738b17880f6f2ad635ab8d1ba9c9a8d.mp3
+```    
+         
+上传信息  
 POST /music
 #### 传入参数
+**以下数据需要保存在key值为data的post数据中进行传输**  
+**同时，上传音乐信息时，需要将从第一个api中返回的数据，保存在key值为token的post数据中**  
 |参数名| 类型 | 必须 | 默认 | 说明|
 |:--|:--|:--|:--|:--|
 |name|string|true|-|歌名|
@@ -194,7 +305,7 @@ POST /music
 | lyric_url | string |false| null |歌词请求url |
 | album | object | false | null |所属专辑 |
 | src_url | string | true | - | 音频资源路径 |
-| published_at | string | true | - |  UTC时间(2009-01-17T20:14:40Z) |
+| published_at | string | true | - |  UTC时间(2009-01-17T20:14:40Z) 
 
 #### 返回值
 |参数名|类型|说明|
@@ -215,6 +326,9 @@ POST /music
     id: '123',
     name: "miaomiao",
     coverr_url: "http://img4.duitang.com/uploads/item/201404/15/20140415093826_SzcNe.thumb.700_0.jpeg",
+    lyric_url: "https://api.darlin.me/music/lyric/12/",
+    src_url: "http://data.5sing.kgimg.com/G104/M09/1C/1D/qA0DAFk1fVGAGWkMAOMuQpygo8g155.mp3",
+    published_at: "2009-01-17T20:14:40Z",
     singer: {
         id: '1',
         name: 'adyden'
@@ -226,17 +340,8 @@ POST /music
     lyricist: {
         id: '3',
         name: 'fuck',
-    },
-    lyric_url: "https://api.darlin.me/music/lyric/12/",
-    album: {
-        id: '5',
-        name: 'album test',
-        cover_url: "",
-        songs_num: 12,
-    },
-    src: "http://data.5sing.kgimg.com/G104/M09/1C/1D/qA0DAFk1fVGAGWkMAOMuQpygo8g155.mp3",
-    published_at: "2009-01-17T20:14:40Z",
-}
+    }
+｝
 ```
 
 ### 修改歌曲信息
@@ -276,6 +381,9 @@ PUT /music/:id
     id: '123',
     name: "miaomiao",
     coverr_url: "http://img4.duitang.com/uploads/item/201404/15/20140415093826_SzcNe.thumb.700_0.jpeg",
+    lyric_url: "https://api.darlin.me/music/lyric/12/",
+    src_url: "http://data.5sing.kgimg.com/G104/M09/1C/1D/qA0DAFk1fVGAGWkMAOMuQpygo8g155.mp3",
+    published_at: "2009-01-17T20:14:40Z",
     singer: {
         id: '1',
         name: 'adyden'
@@ -287,16 +395,7 @@ PUT /music/:id
     lyricist: {
         id: '3',
         name: 'fuck',
-    },
-    lyric_url: "https://api.darlin.me/music/lyric/12/",
-    album: {
-        id: '5',
-        name: 'album test',
-        cover_url: "",
-        songs_num: 12,
-    },
-    src: "http://data.5sing.kgimg.com/G104/M09/1C/1D/qA0DAFk1fVGAGWkMAOMuQpygo8g155.mp3",
-    published_at: "2009-01-17T20:14:40Z",
+    }
 }
 ```
 
