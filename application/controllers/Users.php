@@ -193,7 +193,7 @@ class users extends REST_Controller
     public function collections_get($id = '',$pn = '')
     {
         if(empty($id)){
-            $this->response(array('error' => '用户ID不能为空'), 404);
+            $this->response(array('error' => '用户ID不能为空'), 400);
         }
         //分页
         $this->db->where('collection.user_id', $id);
@@ -224,6 +224,46 @@ class users extends REST_Controller
         $sql['current_page'] = $pn;
         $this->response($sql, 200);
 //        var_dump($sql);
+    }
+    public function collections_post($id = '')
+    {
+        $user_id = 1;//暂时先写死，再改成从token获取id的形式
+        if(empty($id)){
+            $this->response(array('error' => '歌曲ID不能为空'), 400);
+        }
+//        $sql = 'SELECT music.id FROM music WHERE music.id = 1 ';
+        $music_id = $this->db->select('music.id')
+            ->from('music')
+            ->where('music.id',$id)
+            ->get()
+            ->row_array();
+        if(empty($music_id))
+        {
+            $this->response(array('error' => '歌曲不存在'), 404);
+        }
+        $data = [
+            'user_id' =>$user_id,
+            'music_id' =>$id,
+            'collect_at' =>date('Y-m-d H:i:s')
+        ];
+        $collection_id = $this->db->select('collection.id')
+            ->from('collection')
+            ->where('collection.music_id',$id)
+            ->where('collection.user_id',$user_id)
+            ->get()
+            ->row_array();
+        if(empty($collection_id))
+        {
+            if($this->db->insert('collection', $data))
+            {
+                $this->response(array('success' => '收藏成功'), 204);
+            }else{
+                $this->response(array('error' => '收藏失败'), 400);
+            }
+        }else{
+            $this->response(array('error' => '歌曲已收藏'), 409);
+        }
+
     }
 }
 

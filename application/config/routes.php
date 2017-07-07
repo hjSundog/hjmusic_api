@@ -59,3 +59,4 @@ $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 $route['users/(:num)/records'] = 'users/records/$1';
 $route['users/(:num)/collections/(:num)'] = 'users/collections/$1/$2';
+$route['music/(:num)/collect'] = 'users/collections/$1';
