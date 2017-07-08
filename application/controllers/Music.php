@@ -33,10 +33,12 @@ class Music extends REST_Controller
             $this->aim_music($id,$prisoner);
 
         }
-        //如果没有传入参数，则判断是否有分页要求
-        elseif (isset($_GET['offset']) && isset($_GET['limit'])){
-            $offset = $_GET['offset'];  $this->lawyer($offset);
-            $limit = $_GET['limit'];    $this->lawyer($limit);
+        //如果没有传入参数，返回带有分页的music信息
+        else{
+            $offset = isset($_GET['offset']) ? $_GET['offset'] : 0;  $this->lawyer($offset);
+            $limit = isset($_GET['limit']) ? $_GET['limit'] :50;    $this->lawyer($limit);
+            $count = $this->db->query('SELECT count(*) AS count FROM music')->result_array()[0]['count'];
+            $count = floor($count/$limit);
 
             $music = $this->db->query("
             SELECT 
@@ -61,44 +63,45 @@ class Music extends REST_Controller
                 $this->unset_key($info[$key], $prisoner);
             }
 
-            $previous = $_SERVER['HTTP_HOST'].'/music'.'?offset='.($offset-$limit>0 ? $offset-$limit : 1).'&limit='.$limit;
-            $next = $_SERVER['HTTP_HOST'].'/music'.'?offset='.($offset+$limit).'&limit='.$limit;
+            $first = $_SERVER['HTTP_HOST'].'/music'.'?offset0&limit='.$limit;
+            $previous = $_SERVER['HTTP_HOST'].'/music'.'?offset='.($offset-$limit> 0 ? $offset-$limit : 0).'&limit='.$limit;
+            $next = $_SERVER['HTTP_HOST'].'/music'.'?offset='.($offset+$limit < $count ? $offset+$limit : $offset).'&limit='.$limit;
+            $final = $_SERVER['HTTP_HOST'].'/music'.'?offset='.$count.'&limit='.$limit;
 
             $final_info['data'] = $info;
-            $final_info['paging'] = array('previous'=>$previous,'next'=>$next);
+            $final_info['paging'] = array('first'=>$first,'previous'=>$previous,'next'=>$next,'final'=>$final);
 
             $this->response($final_info);
         }
         //没有传入分页参数，返回所有music信息
-        else{
-            $music = $this->db->query("
-            SELECT 
-            music.*,
-            a.name AS singer_name,
-            b.name AS composer_name,
-            c.name AS lyricist_name
-            FROM music
-            INNER JOIN musician AS a ON music.singer_id = a.id
-            INNER JOIN musician AS b ON music.composer_id = b.id
-            INNER JOIN musician AS c ON music.lyricist_id = c.id;");
-
-            //先判断music表中是否存在数据
-            if(!$music->num_rows()){
-                $this->response(array('error'=>'there is no music now'),404);
-            }
-            else {
-                $info = $music->result_array();
-                foreach ($info as $key => $value) {
-                    $info[$key]['singer'] = array('id'=>$info[$key]['singer_id'],'name'=>$info[$key]['singer_name']);
-                    $info[$key]['composer'] = array('id'=>$info[$key]['composer_id'],'name'=>$info[$key]['composer_name']);
-                    $info[$key]['lyricist'] = array('id'=>$info[$key]['lyricist_id'],'name'=>$info[$key]['lyricist_name']);
-//                    $info[$key]['album'] = array('id'=>$info[$key]['album_id'],'name'=>$info[$key]['album_name']);
-                    $this->unset_key($info[$key], $prisoner);
-                }
-                $this->response($info);
-            }
-
-        }
+//        else{
+//            $music = $this->db->query("
+//            SELECT
+//            music.*,
+//            a.name AS singer_name,
+//            b.name AS composer_name,
+//            c.name AS lyricist_name
+//            FROM music
+//            INNER JOIN musician AS a ON music.singer_id = a.id
+//            INNER JOIN musician AS b ON music.composer_id = b.id
+//            INNER JOIN musician AS c ON music.lyricist_id = c.id;");
+//
+//            //先判断music表中是否存在数据
+//            if(!$music->num_rows()){
+//                $this->response(array('error'=>'there is no music now'),404);
+//            }
+//            else {
+//                $info = $music->result_array();
+//                foreach ($info as $key => $value) {
+//                    $info[$key]['singer'] = array('id'=>$info[$key]['singer_id'],'name'=>$info[$key]['singer_name']);
+//                    $info[$key]['composer'] = array('id'=>$info[$key]['composer_id'],'name'=>$info[$key]['composer_name']);
+//                    $info[$key]['lyricist'] = array('id'=>$info[$key]['lyricist_id'],'name'=>$info[$key]['lyricist_name']);
+////                    $info[$key]['album'] = array('id'=>$info[$key]['album_id'],'name'=>$info[$key]['album_name']);
+//                    $this->unset_key($info[$key], $prisoner);
+//                }
+//                $this->response($info);
+//            }
+//        }
     }
 
 
