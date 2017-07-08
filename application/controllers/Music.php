@@ -150,8 +150,8 @@ class Music extends REST_Controller
             $field .= $key.",";
             $f_value .= "'".$value."',";
         }
-        $field = substr($field,0,strlen($field)-1);
-        $f_value = substr($f_value,0,strlen($f_value)-1);
+        $field .= "published_at";
+        $f_value .= "'".date("Y-m-d H:i:s")."'";
         $this->db->query("INSERT INTO music ({$field}) VALUE ({$f_value})");
 
         //获取插入音乐的id
@@ -161,7 +161,8 @@ class Music extends REST_Controller
         $type = explode('.',$token)[1];
         rename($temp_dir.$token,$music_dir.$id.'.'.$type) or $this->response(array('error'=>'can\'t move file'),406);
 
-        $this->response(array('success'=>'The FileInfo upload complete'),200);
+        $data->publish_at = date('Y-m-d\TH:i:s.z\Z');
+        $this->response($data,200);
     }
 
 
@@ -203,12 +204,10 @@ class Music extends REST_Controller
 
 //        $data = $this->_put_args;
         //使用前验证是否接收到json数据
-        try {
-            $data = json_decode($this->put('json'));
-        }
-        catch (Exception $exception){
+        if (empty($this->put('json')))
             $this->response(array('error'=>'json data is missing'),400);
-        }
+
+        $data = json_decode($this->put('json'));
 
         //判断该音乐是否存在
         if (!$this->db->query('SELECT * FROM music WHERE id = '.$id)->num_rows())
@@ -294,12 +293,9 @@ class Music extends REST_Controller
      * @param $musician mixed 艺术家的id
      */
     private function verify_musician($musician){
-        try {
-            $this->db->query("SELECT * FROM musician WHERE id = {$musician->id}");
-        }
-        catch (Exception $exception){
-                $this->response(array('error' => 'this musician is not exist'), 404);
-        }
+        $res = $this->db->query("SELECT * FROM musician WHERE id = {$musician}");
+        if (!$res->num_rows())
+            $this->response(array('error' => 'this musician is not exist'), 404);
     }
 
 
@@ -373,7 +369,7 @@ class Music extends REST_Controller
      * @param $data object 解码的json数据
      */
     private function verify_json($data){
-        $require = array('id','name','cover_url','singer_id','composer_id','lyricist_id','src_url','published_at');
+        $require = array('name','cover_url','singer_id','composer_id','lyricist_id','src_url');
         foreach ($require as $value){
             if (!isset($data->{$value}))
                 $this->response(array('error'=>$value.' is require'),403);
