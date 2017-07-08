@@ -38,7 +38,8 @@ class Music extends REST_Controller
             $offset = isset($_GET['offset']) ? $_GET['offset'] : 0;  $this->lawyer($offset);
             $limit = isset($_GET['limit']) ? $_GET['limit'] :50;    $this->lawyer($limit);
             $count = $this->db->query('SELECT count(*) AS count FROM music')->result_array()[0]['count'];
-            $count = floor($count/$limit);
+            if ($count == 0)    $this->response(array('error'=>'暂无音乐信息'));
+            $fpage = floor(($count-1)/$limit);
 
             $music = $this->db->query("
             SELECT 
@@ -64,9 +65,9 @@ class Music extends REST_Controller
             }
 
             $first = $_SERVER['HTTP_HOST'].'/music'.'?offset0&limit='.$limit;
-            $previous = $_SERVER['HTTP_HOST'].'/music'.'?offset='.($offset-$limit> 0 ? $offset-$limit : 0).'&limit='.$limit;
-            $next = $_SERVER['HTTP_HOST'].'/music'.'?offset='.($offset+$limit < $count ? $offset+$limit : $offset).'&limit='.$limit;
-            $final = $_SERVER['HTTP_HOST'].'/music'.'?offset='.$count.'&limit='.$limit;
+            $previous = $_SERVER['HTTP_HOST'].'/music'.'?offset='.($offset-$limit >= 0 ? $offset-$limit :$offset).'&limit='.$limit;
+            $next = $_SERVER['HTTP_HOST'].'/music'.'?offset='.($offset+$limit+1 <= $count ? $offset+$limit : $offset).'&limit='.$limit;
+            $final = $_SERVER['HTTP_HOST'].'/music'.'?offset='.$fpage.'&limit='.$limit;
 
             $final_info['data'] = $info;
             $final_info['paging'] = array('first'=>$first,'previous'=>$previous,'next'=>$next,'final'=>$final);
