@@ -63,6 +63,12 @@
  * Different environments will require different levels of error reporting.
  * By default development will show errors but testing and live will hide them.
  */
+function dump($str)
+{
+    echo '<pre>';
+    var_dump($str);
+    echo '</pre>';
+}
 switch (ENVIRONMENT)
 {
 	case 'development':
@@ -312,4 +318,5 @@ switch (ENVIRONMENT)
  *
  * And away we go...
  */
+date_default_timezone_set("UTC");
 require_once BASEPATH.'core/CodeIgniter.php';

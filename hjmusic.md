@@ -7,10 +7,12 @@
 #### HTTP Request
 POST /users
 #### 传入参数
+
 | 参数名 | 必须 | 说明 |
-| :-- | :-- | :-- |
+|:--|:--|:--|
 | email | true |用户邮箱 |
 | password | true | 用户密码 |
+
 #### 返回值
 | 参数名 | 类型 | 说明 |
 | :-- | :-- | :-- |
@@ -30,7 +32,7 @@ POST /users
   "username": "lwio",
   "realname": "keke",
   "email": "443474713@qq.com",
-  "auth": "admin",
+  "auth": "admin"
 }
 ```
 ------
