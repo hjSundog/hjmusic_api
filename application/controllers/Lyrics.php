@@ -48,18 +48,11 @@ class Lyrics extends REST_Controller
             $limit = $_GET['limit']; 
             $this->lawyer($limit);
             $this->aim_lyrics($offset,$limit);
-
   		}
-
   		//没有传入分页参数，返回所有歌词信息
   		else{
 	    	//获取歌词的信息
-	    	
-	    	$res = $this->db->query("SELECT
-				*
-				FROM lyric
-
-	    		");
+	    	$res = $this->db->query("SELECT * FROM lyric ");
 	    	if(! $res->num_rows()){
 	    		$this->response(array(['error' => '超出查询的范围']), 403);
 	    	}else{
@@ -78,23 +71,23 @@ class Lyrics extends REST_Controller
 			        INNER JOIN musician AS b ON music.composer_id = b.id
 			        INNER JOIN musician AS c ON music.lyricist_id = c.id
 			        WHERE music.id = {$lyric[$key]['music_id']};
-
 			        ")
 			        ->result_array()[0];
-
+			        //获取该音乐上传者的信息
 			        $uploader = $this->db->query("SELECT
 						*
 						FROM user
 						WHERE id = {$lyric[$key]['uploader_id']};
 			        	")
 			        ->result_array()[0];
-
+					//获取该音乐所属相册专辑的信息
 			        $album = $this->db->query("SELECT
 						*
 						FROM album
 						WHERE id = {$music['album_id']};
 			        	")
 			        ->result_array()[0];
+			        //拼接Json串对应的数组
 			        $info[$key] = array(
 
 			        		'id' => $lyric[$key]['id'],
@@ -136,11 +129,9 @@ class Lyrics extends REST_Controller
 
 			        	);
 		    	}
-
+		    	//输出json串
 		    	$this->response($info);
-
 	    	}
-
   		}
 	}
 
@@ -149,23 +140,21 @@ class Lyrics extends REST_Controller
      */
     function index_post(){
 
-
-        //验证文件令牌、判断文件是否存在
-        $token = $this->post('token');
-        if (empty($token))
-            $this->response(array('error'=>'token is missing'),400);
-
+		//验证用户权限
+        $this->verify_user();
 
         //验证是否接收到json数据
         $data = $this->post('data');
+        var_dump($data);
         if (empty($data))
             $this->response(array('error'=>'json data is missing'),400);
-        $data = json_decode($data);
+        $data = json_decode($data, true);
 
         //验证json数据的完整性
-        $this->verify_json($data);
+		$this->verify_json($data);
 
         //验证数据中的音乐是否存在于music表中
+        var_dump($data);
         $this->verify_music($data->music_id);
       
         //不会检测到用户是否已断开连接，直到尝试向客户机发送信息为止
@@ -184,11 +173,10 @@ class Lyrics extends REST_Controller
 
         //获取插入歌词的id
         $id = $this->last_insert_id();
-
-		$this->response(array('success'=>'The FileInfo upload complete'),200);
-  
+        //返回插入成功提示
+		$this->response(array('success'=>'The Lyric upload complete'),200);
+  		//返回插入后拼接结果
         $this->aim_lyric($id,$prisoner);
-
     }
 
    /**
@@ -201,7 +189,7 @@ class Lyrics extends REST_Controller
         $this->lawyer($id);
 
         //验证管理员权限
-        //$this->verify_auth();
+        $this->verify_auth();
 
         //判断歌词是否存在
         if (!$this->db->query('SELECT * FROM lyric WHERE id = '.$id)->num_rows())
@@ -212,8 +200,6 @@ class Lyrics extends REST_Controller
 
         //返回成功信息
         $this->response(null,204);
-
-
     }
 
 
@@ -251,7 +237,6 @@ class Lyrics extends REST_Controller
     	}else{
 	    	$lyric = $res->result_array()[0];
 
-
 	        //获取该音乐的信息
 	        $music = $this->db->query("SELECT 
 	        music.*,
@@ -263,26 +248,24 @@ class Lyrics extends REST_Controller
 	        INNER JOIN musician AS b ON music.composer_id = b.id
 	        INNER JOIN musician AS c ON music.lyricist_id = c.id
 	        WHERE music.id = {$lyric['music_id']};
-
 	        ")
 	        ->result_array()[0];
 
-
-
+			//获取该音乐的上传者的信息
 	        $uploader = $this->db->query("SELECT
 				*
 				FROM user
 				WHERE id = {$lyric['uploader_id']};
 	        	")
 	        ->result_array()[0];
-
+			//获取该音乐所属专辑的信息
 	        $album = $this->db->query("SELECT
 				*
 				FROM album
 				WHERE id = {$music['album_id']};
 	        	")
 	        ->result_array()[0];
-
+	        //拼接输出数组
 	        $info = array(
 
 	        		'id' => $lyric['id'],
@@ -323,17 +306,9 @@ class Lyrics extends REST_Controller
 	        			)
 
 	        	);
+			//输出json串
 			$this->response($info);
-			
-
-
     	}
-    	
-
-
-
-
-
     }
 
 
@@ -345,12 +320,10 @@ class Lyrics extends REST_Controller
     private function aim_lyrics($offset,$limit){
  
     	//获取该歌词的信息
-    	
     	$res = $this->db->query("SELECT
 			*
 			FROM lyric
 			LIMIT {$offset},{$limit};
-
     		");
     	if(! $res->num_rows()){
     		$this->response(array(['error' => '超出查询的范围']), 403);
@@ -370,10 +343,9 @@ class Lyrics extends REST_Controller
 		        INNER JOIN musician AS b ON music.composer_id = b.id
 		        INNER JOIN musician AS c ON music.lyricist_id = c.id
 		        WHERE music.id = {$lyric[$key]['music_id']};
-
 		        ")
 		        ->result_array()[0];
-
+		        //获取该音乐的上传者的信息
 		        $uploader = $this->db->query("SELECT
 					*
 					FROM user
@@ -468,9 +440,32 @@ class Lyrics extends REST_Controller
         }
     }
 
+    /**
+     * 验证管理员权限
+     */
+    private function verify_auth(){
+        $this->load->library('jwt');
+        $headers = $this->input->request_headers();
 
+        if (empty($headers['Access-Token']))
+            $this->response(array('error'=>'Access-Token is missing'));
 
+        $auth = $token->auth;
+        if ($auth != 'administrator') $this->response(array('error'=>'Unauthorized'),403);
+    }
 
+    /**
+     * 验证用户登陆
+     */
+    private function verify_user(){
+        $this->load->library('jwt');
+        $headers = $this->input->request_headers();
 
+        if (empty($headers['Access-Token']))
+            $this->response(array('error'=>'Access-Token is missing'));
+
+        $auth = $token->auth;
+        if ($auth != 'user') $this->response(array('error'=>'Please login first!'),403);
+    }
 
 }

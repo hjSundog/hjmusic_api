@@ -33,10 +33,13 @@ class Music extends REST_Controller
             $this->aim_music($id,$prisoner);
 
         }
-        //如果没有传入参数，则判断是否有分页要求
-        elseif (isset($_GET['offset']) && isset($_GET['limit'])){
-            $offset = $_GET['offset'];  $this->lawyer($offset);
-            $limit = $_GET['limit'];    $this->lawyer($limit);
+        //如果没有传入参数，返回带有分页的music信息
+        else{
+            $offset = isset($_GET['offset']) ? $_GET['offset'] : 0;  $this->lawyer($offset);
+            $limit = isset($_GET['limit']) ? $_GET['limit'] :50;    $this->lawyer($limit);
+            $count = $this->db->query('SELECT count(*) AS count FROM music')->result_array()[0]['count'];
+            if ($count == 0)    $this->response(array('error'=>'暂无音乐信息'));
+            $fpage = floor(($count-1)/$limit);
 
             $music = $this->db->query("
             SELECT 
@@ -61,44 +64,45 @@ class Music extends REST_Controller
                 $this->unset_key($info[$key], $prisoner);
             }
 
-            $previous = $_SERVER['HTTP_HOST'].'/music'.'?offset='.($offset-$limit>0 ? $offset-$limit : 1).'&limit='.$limit;
-            $next = $_SERVER['HTTP_HOST'].'/music'.'?offset='.($offset+$limit).'&limit='.$limit;
+            $first = $_SERVER['HTTP_HOST'].'/music'.'?offset0&limit='.$limit;
+            $previous = $_SERVER['HTTP_HOST'].'/music'.'?offset='.($offset-$limit >= 0 ? $offset-$limit :$offset).'&limit='.$limit;
+            $next = $_SERVER['HTTP_HOST'].'/music'.'?offset='.($offset+$limit+1 <= $count ? $offset+$limit : $offset).'&limit='.$limit;
+            $final = $_SERVER['HTTP_HOST'].'/music'.'?offset='.$fpage.'&limit='.$limit;
 
             $final_info['data'] = $info;
-            $final_info['paging'] = array('previous'=>$previous,'next'=>$next);
+            $final_info['paging'] = array('first'=>$first,'previous'=>$previous,'next'=>$next,'final'=>$final);
 
             $this->response($final_info);
         }
         //没有传入分页参数，返回所有music信息
-        else{
-            $music = $this->db->query("
-            SELECT 
-            music.*,
-            a.name AS singer_name,
-            b.name AS composer_name,
-            c.name AS lyricist_name
-            FROM music
-            INNER JOIN musician AS a ON music.singer_id = a.id
-            INNER JOIN musician AS b ON music.composer_id = b.id
-            INNER JOIN musician AS c ON music.lyricist_id = c.id;");
-
-            //先判断music表中是否存在数据
-            if(!$music->num_rows()){
-                $this->response(array('error'=>'there is no music now'),404);
-            }
-            else {
-                $info = $music->result_array();
-                foreach ($info as $key => $value) {
-                    $info[$key]['singer'] = array('id'=>$info[$key]['singer_id'],'name'=>$info[$key]['singer_name']);
-                    $info[$key]['composer'] = array('id'=>$info[$key]['composer_id'],'name'=>$info[$key]['composer_name']);
-                    $info[$key]['lyricist'] = array('id'=>$info[$key]['lyricist_id'],'name'=>$info[$key]['lyricist_name']);
-//                    $info[$key]['album'] = array('id'=>$info[$key]['album_id'],'name'=>$info[$key]['album_name']);
-                    $this->unset_key($info[$key], $prisoner);
-                }
-                $this->response($info);
-            }
-
-        }
+//        else{
+//            $music = $this->db->query("
+//            SELECT
+//            music.*,
+//            a.name AS singer_name,
+//            b.name AS composer_name,
+//            c.name AS lyricist_name
+//            FROM music
+//            INNER JOIN musician AS a ON music.singer_id = a.id
+//            INNER JOIN musician AS b ON music.composer_id = b.id
+//            INNER JOIN musician AS c ON music.lyricist_id = c.id;");
+//
+//            //先判断music表中是否存在数据
+//            if(!$music->num_rows()){
+//                $this->response(array('error'=>'there is no music now'),404);
+//            }
+//            else {
+//                $info = $music->result_array();
+//                foreach ($info as $key => $value) {
+//                    $info[$key]['singer'] = array('id'=>$info[$key]['singer_id'],'name'=>$info[$key]['singer_name']);
+//                    $info[$key]['composer'] = array('id'=>$info[$key]['composer_id'],'name'=>$info[$key]['composer_name']);
+//                    $info[$key]['lyricist'] = array('id'=>$info[$key]['lyricist_id'],'name'=>$info[$key]['lyricist_name']);
+////                    $info[$key]['album'] = array('id'=>$info[$key]['album_id'],'name'=>$info[$key]['album_name']);
+//                    $this->unset_key($info[$key], $prisoner);
+//                }
+//                $this->response($info);
+//            }
+//        }
     }
 
 
@@ -146,8 +150,8 @@ class Music extends REST_Controller
             $field .= $key.",";
             $f_value .= "'".$value."',";
         }
-        $field = substr($field,0,strlen($field)-1);
-        $f_value = substr($f_value,0,strlen($f_value)-1);
+        $field .= "published_at";
+        $f_value .= "'".date("Y-m-d H:i:s")."'";
         $this->db->query("INSERT INTO music ({$field}) VALUE ({$f_value})");
 
         //获取插入音乐的id
@@ -157,7 +161,8 @@ class Music extends REST_Controller
         $type = explode('.',$token)[1];
         rename($temp_dir.$token,$music_dir.$id.'.'.$type) or $this->response(array('error'=>'can\'t move file'),406);
 
-        $this->response(array('success'=>'The FileInfo upload complete'),200);
+        $data->publish_at = date('Y-m-d\TH:i:s.z\Z');
+        $this->response($data,200);
     }
 
 
@@ -199,12 +204,10 @@ class Music extends REST_Controller
 
 //        $data = $this->_put_args;
         //使用前验证是否接收到json数据
-        try {
-            $data = json_decode($this->put('json'));
-        }
-        catch (Exception $exception){
+        if (empty($this->put('json')))
             $this->response(array('error'=>'json data is missing'),400);
-        }
+
+        $data = json_decode($this->put('json'));
 
         //判断该音乐是否存在
         if (!$this->db->query('SELECT * FROM music WHERE id = '.$id)->num_rows())
@@ -290,12 +293,9 @@ class Music extends REST_Controller
      * @param $musician mixed 艺术家的id
      */
     private function verify_musician($musician){
-        try {
-            $this->db->query("SELECT * FROM musician WHERE id = {$musician->id}");
-        }
-        catch (Exception $exception){
-                $this->response(array('error' => 'this musician is not exist'), 404);
-        }
+        $res = $this->db->query("SELECT * FROM musician WHERE id = {$musician}");
+        if (!$res->num_rows())
+            $this->response(array('error' => 'this musician is not exist'), 404);
     }
 
 
@@ -369,7 +369,7 @@ class Music extends REST_Controller
      * @param $data object 解码的json数据
      */
     private function verify_json($data){
-        $require = array('id','name','cover_url','singer_id','composer_id','lyricist_id','src_url','published_at');
+        $require = array('name','cover_url','singer_id','composer_id','lyricist_id','src_url');
         foreach ($require as $value){
             if (!isset($data->{$value}))
                 $this->response(array('error'=>$value.' is require'),403);
