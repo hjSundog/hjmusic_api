@@ -190,46 +190,108 @@ class users extends REST_Controller
         } else
             $this->response(array('error' => 'user could not be found'), 404);
     }
-    public function collections_get($id = '',$pn = '')
+    public function collections_get($id = '')
     {
-        if(empty($id)){
-            $this->response(array('error' => '用户ID不能为空'), 400);
+        if(!preg_match("/^[1-9]\d*$/",(int)$id)){
+            $this->response(array('error' => '用户ID格式不正确'), 400);
         }
         //分页
         $this->db->where('collection.user_id', $id);
         $this->db->from('collection');
         $all_num = $this->db->count_all_results();          //总数
         $this->db->reset_query();
-        $page_num = 20;                                           //每页显示20条
-        $page_count =ceil($all_num/$page_num);
-        if ($page_count == 0){
-            $page_count =1;
-        }
-        if($pn > $page_count){
-            $pn = $page_count;
-        }
-        $pn         =empty($pn)?1:$pn;                    //当前页数
-        $pn         =(int)$pn;                              //安全强制转换
-        $limit_st     =($pn-1)*$page_num;                     //起始数
-        $this->db->select('music.id,music.`name`,music.cover_url,c.`name` AS singer,a.`name` AS composer,b.`name` AS lyricist,music.lyric_url,music.album_id,music.src_url,music.published_at');
+        $offset = isset($_GET['offset']) ? (int)$_GET['offset']>0 ? $_GET['offset'] : 0 : 0;
+        $limit = isset($_GET['limit']) ? (int)$_GET['limit'] :50;
+        $foffset = (ceil($all_num/$limit)-1)*$limit<0?0:(ceil($all_num/$limit)-1)*$limit;
+        $offset = $offset>$foffset?$foffset:$offset;
+        $poffset = ($offset - $limit)>=0?$offset - $limit:0;
+        $noffset = ($offset + $limit)<=($all_num-1)?$offset + $limit:$offset;
+        $page = [
+            'first'=>$_SERVER['HTTP_HOST']."/users/$id/collections?offset=0&limit=".$limit,
+            'previous'=>$_SERVER['HTTP_HOST']."/users/$id/collections?offset=".$poffset."&limit=".$limit,
+            'next'=>$_SERVER['HTTP_HOST']."/users/$id/collections?offset=".$noffset."&limit=".$limit,
+            'final'=>$_SERVER['HTTP_HOST']."/users/$id/collections?offset=".$foffset."&limit=".$limit,
+        ];
+        $this->db->select('`collection`.`id`,`collection`.`collect_at`,`music`.`id` AS music_id,`music`.`name`,`music`.`cover_url`,`c`.`name` AS `singer_name`,`a`.`name` AS `composer_name`,`b`.`name` AS `lyricist_name`,`c`.id AS `singer_id`,`b`.id AS `lyricist_id`,`a`.id AS `composer_id`,`music`.`lyric_url`,`music`.`album_id`,`music`.`src_url` AS `src`,`music`.`published_at`');
         $this->db->from('collection');
         $this->db->join('music', 'collection.music_id = music.id');
         $this->db->join('musician AS a','music.composer_id = a.id');
-        $this->db->join('musician AS b','music.composer_id = b.id');
-        $this->db->join('musician AS c','music.composer_id = c.id');
+        $this->db->join('musician AS b','music.lyricist_id = b.id');
+        $this->db->join('musician AS c','music.singer_id = c.id');
         $this->db->where('collection.user_id', $id);
-        $this->db->limit($page_num,$limit_st);
+        $this->db->order_by('id');
+        $this->db->limit($limit,$offset);
         $sql = $this->db->get()->result_array();
-        $sql['page_count']  = $page_count;
-        $sql['current_page'] = $pn;
-        $this->response($sql, 200);
-//        var_dump($sql);
+        foreach ($sql as $key=>$value){
+            $rs[$key] = [
+                'id'=>$value['id'],
+                'collect_at'=>$value['collect_at'],
+                'music'=>[
+                    'id'=>$value['music_id'],
+                    'name'=>$value['name'],
+                    'cover_url'=>$value['cover_url'],
+                    'singer'=>[
+                        'id'=>$value['singer_id'],
+                        'name'=>$value['singer_name']
+                    ],
+                    'composer'=>[
+                        'id'=>$value['composer_id'],
+                        'name'=>$value['composer_name']
+                    ],
+                    'lyricist'=>[
+                        'id'=>$value['lyricist_id'],
+                        'name'=>$value['lyricist_name']
+                    ],
+                    'lyric_url'=>$value['lyric_url'],
+                    'album'=>[
+                        NULL
+//                    'id'=>$value['album_id'],
+//                    'name'=>'',
+//                    'cover_url'=>'',
+//                    'songs_num'=>''
+                    ],
+                    'src'=>$value['src'],
+                    'published_at'=>$value['published_at']
+                ],
+            ];
+        }
+        if(empty($rs)){
+            $rs = [NULL];
+        }
+        $this->response(['data'=>$rs,'paging'=>$page], 200);
+
+    }
+    private function parsing_token($jwt)
+    {
+        try{
+            $token = $this->jwt->decode($jwt,$this->config->item('encryption_key'));
+        }
+        catch(InvalidArgumentException $e)
+        {
+            $this->response('token解析失败，原因：'.$e->getMessage(),400);
+        }
+        catch(UnexpectedValueException $e)
+        {
+            $this->response('token解析失败，原因：'.$e->getMessage(),400);
+        }
+        return $token;
     }
     public function collections_post($id = '')
     {
-        $user_id = 1;//暂时先写死，再改成从token获取id的形式
-        if(empty($id)){
-            $this->response(array('error' => '歌曲ID不能为空'), 400);
+        $access_token = $this->input->request_headers();
+        if(!empty($access_token['Access-Token'])){
+            $token = $this->parsing_token($access_token['Access-Token']);
+//            $data = [] ;
+        }else{
+            $this->response('密钥获取失败，请重新登录！',400);
+        }
+        try{
+            $user_id = $token->user_id;
+        }catch (Exception $e){
+            $this->response($e,400);
+        }
+        if(!preg_match("/^[1-9]\d*$/",(int)$id)){
+            $this->response(array('error' => '歌曲ID格式不正确'), 400);
         }
 //        $sql = 'SELECT music.id FROM music WHERE music.id = 1 ';
         $music_id = $this->db->select('music.id')
