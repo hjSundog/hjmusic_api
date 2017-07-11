@@ -1,6 +1,6 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 require APPPATH.'/libraries/REST_Controller.php';
-class Lwy extends CI_Controller
+class Lwy extends REST_Controller
 {
 
 	public  function __construct()
@@ -14,38 +14,98 @@ class Lwy extends CI_Controller
         header('Access-Control-Allow-Headers:*'); 
 	}
 
-	private function response($data,$ret=200,$msg=null)
-	{
-        $response=array('ret'=>$ret,'data'=>$data,'msg'=>$msg);
-        $this->output
-            ->set_status_header($ret)
-            ->set_header('Cache-Control: no-store, no-cache, must-revalidate')
-            ->set_header('Pragma: no-cache')
-            ->set_header('Expires: 0')
-            ->set_content_type('application/json', 'utf-8')
-            ->set_output(json_encode($response))
-            ->_display();
-        exit;
+	// public function response($data,$ret=200,$msg=null)
+	// {
+ //        $response=array('ret'=>$ret,'data'=>$data,'msg'=>$msg);
+ //        $this->output
+ //            ->set_status_header($ret)
+ //            ->set_header('Cache-Control: no-store, no-cache, must-revalidate')
+ //            ->set_header('Pragma: no-cache')
+ //            ->set_header('Expires: 0')
+ //            ->set_content_type('application/json', 'utf-8')
+ //            ->set_output(json_encode($response))
+ //            ->_display();
+ //        exit;
+ //    }
+
+	public function index_post()
+    {
+    	//注册
+//        $data = [
+//            'user_email' => $this->input->post('user_email'),
+//            'password' => password_hash($this->input->post('password'),PASSWORD_DEFAULT)
+//        ];
+
+        $data = json_decode(trim(file_get_contents('php://input')), true);
+        $data['password'] = password_hash($data['password'],PASSWORD_DEFAULT);
+        $query = $this->db->get_where('user', array('user_email' => $data['user_email']))->row_array();
+        if($query){
+            $this->response(['error'=>'邮箱被占用！'], 400);
+        }else{
+            $this->db->insert('user', $data);
+            $user = $this->db->get_where('user', array('user_id' => $this->db->insert_id()))->row_array();
+            $user['token'] = $this->jwt->encode(['exp'=>time()+604800,'auth'=>$user['auth'],'id'=>$user['id']],$this->config->item('encryption_key'));
+            unset($user['pwd']);
+            $this->response($user, 200);
+        }
     }
 
+    function index_get($id = '')
+    {
+    	
+        $query = $this->db->query('SELECT * FROM user');
+        // Example data for testing.
+        $user = $query->result_array();
 
-	public function index()
-	{
-		$this->load->view('reg');
-	}
+        //if (!$user_id) { $user_id = $this->get('user_id'); }
+        if (!$id)
 
-	public function login()
+            {
+                //$user = $this->user_model->getuser();
+                if($user){
+                    foreach($user as $key=>$value)
+                    {
+                        unset($value['password']);
+                        $user[$key] = $value;
+                    }
+
+                    $this->response($user, 200); // 200 being the HTTP response code
+                }
+
+                else
+                    $this->response(array('error' => 'Couldn\'t find any user!'), 404);
+            }
+
+        //$user = $this->user_model->getuser($id);
+
+        if ($id)
+            {
+            $query = $this->db->query('SELECT * FROM user WHERE id = '.$id);
+
+            $user = $query->row_array();
+            if($user){
+                unset($user['password']);
+                $user['header'] = $this->input->get_request_header('Access-Token');
+                $this->response($user, 200); // 200 being the HTTP response code
+            }
+
+            else
+                $this->response(array('error' => 'user could not be found'), 404);
+            }
+        if ($id == 0) $this->response(array('error' => 'user could not be found'), 404);
+    }
+
+    //--------------------------------------------------------------------------------------------------s
+
+	
+	public function signin_post()
 	{
-		$this->load->view('Login');
-	}
-	public function logining()
-	{
+
+		//登陆
 
 			$email = $this->input->post('email');
 			$password = $this->input->post('password');
-			// echo "$email";
-			// echo "$password";
-			
+
 			$this->form_validation->set_rules('email','Email','required|valid_email');
 			$this->form_validation->set_rules('password','password','required');
 
@@ -84,12 +144,9 @@ class Lwy extends CI_Controller
             	//print_r($data);
         	}
 	}
-	public function reg()
-	{
-		$this->load->view('reg');
-	}
+	
 
-	public function register()
+	public function register_post()
 	{
 		$email = $this->input->post('email');
 		$username = $this->input->post('username');
