@@ -141,21 +141,22 @@ class Lyrics extends REST_Controller
     function index_post(){
 
 		//验证用户权限
-        $this->verify_user();
+        //$this->verify_user();
 
         //验证是否接收到json数据
-        $data = $this->post('data');
-        var_dump($data);
+        //$data = $this->input->post('data');
+        //$headers = $this->input->request_headers();
+        $data = $this->_post_args[0];
+
+    	//$data = '{"music_id":123,"lyric":"jsdlfjlsdfjlsfjsjflsjfndkflglkd"}';
         if (empty($data))
             $this->response(array('error'=>'json data is missing'),400);
         $data = json_decode($data, true);
-
         //验证json数据的完整性
 		$this->verify_json($data);
 
         //验证数据中的音乐是否存在于music表中
-        var_dump($data);
-        $this->verify_music($data->music_id);
+        $this->verify_music($data["music_id"]);
       
         //不会检测到用户是否已断开连接，直到尝试向客户机发送信息为止
         ignore_user_abort(true);
@@ -172,11 +173,12 @@ class Lyrics extends REST_Controller
         $this->db->query("INSERT INTO lyric ({$field}) VALUE ({$f_value})");
 
         //获取插入歌词的id
-        $id = $this->last_insert_id();
+        $id = $this->db->insert_id();
+        $this->aim_lyric($id,Null);
         //返回插入成功提示
 		$this->response(array('success'=>'The Lyric upload complete'),200);
   		//返回插入后拼接结果
-        $this->aim_lyric($id,$prisoner);
+
     }
 
    /**
@@ -434,8 +436,11 @@ class Lyrics extends REST_Controller
      */
     private function verify_json($data){
         $require = array('music_id','lyric');
+ 
+        //var_dump($data->{music_id});
         foreach ($require as $value){
-            if (!isset($data->{$value}))
+
+            if (!isset($data[$value]))
                 $this->response(array('error'=>$value.' is require'),403);
         }
     }
