@@ -29,7 +29,7 @@ class Lyrics extends REST_Controller
      */
     function index_get($id = null){
 
-        //需要重构的数据
+        //需要重构的数据,此数组仅用来记录有哪几个表ID
         $prisoner = array('lyric_id','music_id','singer_id','composer_id','lyricist_id','album_id','uploader_id');
 
         //如果传入参数，则返回该id的lyric信息
@@ -125,11 +125,19 @@ class Lyrics extends REST_Controller
 			        				'realname' => $uploader['realname'],
 			        				'email' => $uploader['email'],
 			        				'auth' => $uploader['auth']
-			        			)
+			        			),
+			        		'check' => $lyric[$key]['check']
 
 			        	);
 		    	}
 		    	//输出json串
+		    	//默认输出50个/页
+		    	$limit = 50;
+	            $previous = $_SERVER['HTTP_HOST'].'/lyrics'.'?offset='.($offset-$limit>0 ? $offset-$limit : 1).'&limit='.$limit;
+	            $next = $_SERVER['HTTP_HOST'].'/lyrics'.'?offset='.($offset+$limit).'&limit='.$limit;
+
+	            $info['data'] = $info;
+	            $info['paging'] = array('previous'=>$previous,'next'=>$next);
 		    	$this->response($info);
 	    	}
   		}
@@ -141,7 +149,7 @@ class Lyrics extends REST_Controller
     function index_post(){
 
 		//验证用户权限
-        //$this->verify_user();
+        $this->verify_user();
 
         //验证是否接收到json数据
         //$data = $this->input->post('data');
@@ -201,7 +209,7 @@ class Lyrics extends REST_Controller
         $this->db->query("DELETE FROM lyric WHERE id = {$id}") or $this->response(array('error'=>'fail to delete'),500);
 
         //返回成功信息
-        $this->response(null,204);
+        $this->response(array('success'=>'The Lyric deleted complete'),204);
     }
 
 
@@ -305,7 +313,8 @@ class Lyrics extends REST_Controller
 	        				'realname' => $uploader['realname'],
 	        				'email' => $uploader['email'],
 	        				'auth' => $uploader['auth']
-	        			)
+	        			),
+	        		'check' => $lyric['check']
 
 	        	);
 			//输出json串
@@ -398,7 +407,8 @@ class Lyrics extends REST_Controller
 		        				'realname' => $uploader['realname'],
 		        				'email' => $uploader['email'],
 		        				'auth' => $uploader['auth']
-		        			)
+		        			),
+	        			'check' => $lyric['check']
 
 		        	);
 	    	}
@@ -441,7 +451,7 @@ class Lyrics extends REST_Controller
         foreach ($require as $value){
 
             if (!isset($data[$value]))
-                $this->response(array('error'=>$value.' is require'),403);
+                $this->response(array('error'=>$value.' is require'),404);
         }
     }
 

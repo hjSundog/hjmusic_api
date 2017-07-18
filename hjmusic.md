@@ -293,8 +293,7 @@ POST /upload/music
 上传信息  
 POST /music
 #### 传入参数
-**以下数据需要保存在key值为data的post数据中进行传输**  
-**同时，上传音乐信息时，需要将从第一个api中返回的数据，保存在key值为token的post数据中**  
+**同时，上传音乐信息时，需要将从第一个api中返回的数据，保存在key值为File-Token的自定义头部中**  
 |参数名| 类型 | 必须 | 默认 | 说明|
 |:--|:--|:--|:--|:--|
 |name|string|true|-|歌名|
@@ -540,6 +539,7 @@ GET /lyrics
 | uploader | object | 上传者 |
 | uploaded_at | datetime | 上传时间 |
 | lyric | text | 歌词内容 |
+| check | enum | 是否审核 |
 #### 例子
 ```Json
 {
@@ -581,6 +581,7 @@ GET /lyrics
                 "email": "443474713@qq.com",
                 "auth": "admin",
             },
+            check: '1',
         }
     ],
     paging: {
@@ -613,7 +614,7 @@ GET /lyrics/:id
 ```Json
 {
     id: 12,
-    uploaded_at: "published_at: "2009-01-17T20:14:40Z",
+    uploaded_at: "2009-01-17T20:14:40Z",
     lyric: "afeihoIFIOEHOIefooqihfoIHFOoifoehqofhqoiefoihqfoOHOIqefofhoqfehoqfhoqe",
     music: {
         id: '123',
@@ -648,6 +649,7 @@ GET /lyrics/:id
         email: "443474713@qq.com",
         auth: "admin",
     },
+    check: '1',
 }
 ```
 -----
@@ -668,6 +670,7 @@ POST /lyrics
 |uploader|object|上传者|
 |uploaded_at|string|上传时间|
 |lyric|text|歌词内容|
+|check|enum|是否审核|
 #### 例子
 ```Json
 {
@@ -707,6 +710,7 @@ POST /lyrics
         email: "443474713@qq.com",
         auth: "admin",
     },
+    check: '0',
 }
 ```
 

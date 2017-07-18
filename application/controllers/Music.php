@@ -120,7 +120,7 @@ class Music extends REST_Controller
         $music_dir = $this->config->item('music_path');
 
         //验证文件令牌、判断文件是否存在
-        $token = $this->post('token');
+        $token = $this->input->request_headers()['File-Token'];
         if (empty($token))
             $this->response(array('error'=>'token is missing'),400);
 
@@ -128,7 +128,7 @@ class Music extends REST_Controller
             $this->response(array('error'=>'not found the file'),404);
 
         //验证是否接收到json数据
-        $data = $this->post('data');
+        $data = file_get_contents('php://input');
         if (empty($data))
             $this->response(array('error'=>'json data is missing'),400);
         $data = json_decode($data);
@@ -206,8 +206,7 @@ class Music extends REST_Controller
         //使用前验证是否接收到json数据
         if (empty($this->put('json')))
             $this->response(array('error'=>'json data is missing'),400);
-
-        $data = json_decode($this->put('json'));
+        $data = json_decode(file_get_contents('php://input'));
 
         //判断该音乐是否存在
         if (!$this->db->query('SELECT * FROM music WHERE id = '.$id)->num_rows())
@@ -382,7 +381,8 @@ class Music extends REST_Controller
      * @return mixed $id 最后一次插入的数据的id
      */
     private function last_insert_id(){
-        $res = $this->db->query("SELECT LAST_INSERT_ID() AS id;")->result_array();
-        return $res[0]['id'];
+        return $this->db->insert_id();
+        //$res = $this->db->query("SELECT LAST_INSERT_ID() AS id;")->result_array();
+//        return $res[0]['id'];
     }
 }
