@@ -539,13 +539,14 @@ GET /lyrics
 | uploader | object | 上传者 |
 | uploaded_at | datetime | 上传时间 |
 | lyric | text | 歌词内容 |
+| check | enum | 是否审核 |
 #### 例子
-```Json
+```
 {
     data: [
         {
             id: 12,
-            uploaded_at: "published_at: "2009-01-17T20:14:40Z",
+            uploaded_at: "2009-01-17T20:14:40Z",
             lyric: "afeihoIFIOEHOIefooqihfoIHFOoifoehqofhqoiefoihqfoOHOIqefofhoqfehoqfhoqe",
             music: {
                 id: '123',
@@ -580,6 +581,7 @@ GET /lyrics
                 "email": "443474713@qq.com",
                 "auth": "admin",
             },
+            check: '1',
         }
     ],
     paging: {
@@ -609,10 +611,10 @@ GET /lyrics/:id
 |uploaded_at|datetime|上传时间|
 |lyric|text|歌词内容|
 #### 例子
-```Json
+```
 {
     id: 12,
-    uploaded_at: "published_at: "2009-01-17T20:14:40Z",
+    uploaded_at: "2009-01-17T20:14:40Z",
     lyric: "afeihoIFIOEHOIefooqihfoIHFOoifoehqofhqoiefoihqfoOHOIqefofhoqfehoqfhoqe",
     music: {
         id: '123',
@@ -647,6 +649,7 @@ GET /lyrics/:id
         email: "443474713@qq.com",
         auth: "admin",
     },
+    check: '1',
 }
 ```
 -----
@@ -667,8 +670,9 @@ POST /lyrics
 |uploader|object|上传者|
 |uploaded_at|string|上传时间|
 |lyric|text|歌词内容|
+|check|enum|是否审核|
 #### 例子
-```Json
+```
 {
     id: 12,
     uploaded_at: "published_at: "2009-01-17T20:14:40Z",
@@ -706,6 +710,7 @@ POST /lyrics
         email: "443474713@qq.com",
         auth: "admin",
     },
+    check: '0',
 }
 ```
 
