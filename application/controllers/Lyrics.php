@@ -90,43 +90,43 @@ class Lyrics extends REST_Controller
 			        //拼接Json串对应的数组
 			        $info[$key] = array(
 
-			        		'id' => $lyric[$key]['id'],
-			        		'uploaded_at' => $lyric[$key]['uploaded_at'],
-			        		'lyric' => $lyric[$key]['lyric'],
-			        		'music' => array(
-			        				'id' => $music['id'],
-			        				'name' => $music['name'],
-			        				'coverr_url' => $music['cover_url'],
-			        				'singer' => array(
-			        						'id' => $music['singer_id'],
-			        						'name' => $music['singer_name']
-			        					),
-			        				'composer' => array(
-			        						'id' =>  $music['composer_id'],
-			        						'name' => $music['composer_name']
-			        					),
-			        				'lyricist' => array(
-			        						'id' => $music['lyricist_id'],
-			        						'name' => $music['lyricist_name']
-			        					),
-			        				'lyric_url' => $music['lyric_url'],
-			        				'album' => array(
-			        						'id' => $album['id'],
-			        						'name' => $album['name'],
-			        						'cover_url' => $album['cover_url'],
-			        						'songs_num' => $album['songs_num']
-			        					),
-			        				'src' => $music['src_url'],
-			        				'published_at' => $music['published_at']
-			        			),
-			        		'uploader' => array(
-			        				'id' => $uploader['id'],
-			        				'username' => $uploader['username'],
-			        				'realname' => $uploader['realname'],
-			        				'email' => $uploader['email'],
-			        				'auth' => $uploader['auth']
-			        			),
-			        		'check' => $lyric[$key]['check']
+		        		'id' => $lyric[$key]['id'],
+		        		'uploaded_at' => $lyric[$key]['uploaded_at'],
+		        		'lyric' => $lyric[$key]['lyric'],
+		        		'music' => array(
+	        				'id' => $music['id'],
+	        				'name' => $music['name'],
+	        				'coverr_url' => $music['cover_url'],
+	        				'singer' => array(
+        						'id' => $music['singer_id'],
+        						'name' => $music['singer_name']
+	        					),
+	        				'composer' => array(
+        						'id' =>  $music['composer_id'],
+        						'name' => $music['composer_name']
+	        					),
+	        				'lyricist' => array(
+        						'id' => $music['lyricist_id'],
+        						'name' => $music['lyricist_name']
+	        					),
+	        				'lyric_url' => $music['lyric_url'],
+	        				'album' => array(
+        						'id' => $album['id'],
+        						'name' => $album['name'],
+        						'cover_url' => $album['cover_url'],
+        						'songs_num' => $album['songs_num']
+	        					),
+	        				'src' => $music['src_url'],
+	        				'published_at' => $music['published_at']
+		        			),
+		        		'uploader' => array(
+	        				'id' => $uploader['id'],
+	        				'username' => $uploader['username'],
+	        				'realname' => $uploader['realname'],
+	        				'email' => $uploader['email'],
+	        				'auth' => $uploader['auth']
+		        			),
+		        		'check' => $lyric[$key]['check']
 
 			        	);
 		    	}
@@ -278,43 +278,43 @@ class Lyrics extends REST_Controller
 	        //拼接输出数组
 	        $info = array(
 
-	        		'id' => $lyric['id'],
-	        		'uploaded_at' => $lyric['uploaded_at'],
-	        		'lyric' => $lyric['lyric'],
-	        		'music' => array(
-	        				'id' => $music['id'],
-	        				'name' => $music['name'],
-	        				'coverr_url' => $music['cover_url'],
-	        				'singer' => array(
-	        						'id' => $music['singer_id'],
-	        						'name' => $music['singer_name']
-	        					),
-	        				'composer' => array(
-	        						'id' =>  $music['composer_id'],
-	        						'name' => $music['composer_name']
-	        					),
-	        				'lyricist' => array(
-	        						'id' => $music['lyricist_id'],
-	        						'name' => $music['lyricist_name']
-	        					),
-	        				'lyric_url' => $music['lyric_url'],
-	        				'album' => array(
-	        						'id' => $album['id'],
-	        						'name' => $album['name'],
-	        						'cover_url' => $album['cover_url'],
-	        						'songs_num' => $album['songs_num']
-	        					),
-	        				'src' => $music['src_url'],
-	        				'published_at' => $music['published_at']
-	        			),
-	        		'uploader' => array(
-	        				'id' => $uploader['id'],
-	        				'username' => $uploader['username'],
-	        				'realname' => $uploader['realname'],
-	        				'email' => $uploader['email'],
-	        				'auth' => $uploader['auth']
-	        			),
-	        		'check' => $lyric['check']
+        		'id' => $lyric['id'],
+        		'uploaded_at' => $lyric['uploaded_at'],
+        		'lyric' => $lyric['lyric'],
+        		'music' => array(
+    				'id' => $music['id'],
+    				'name' => $music['name'],
+    				'coverr_url' => $music['cover_url'],
+    				'singer' => array(
+						'id' => $music['singer_id'],
+						'name' => $music['singer_name']
+    					),
+    				'composer' => array(
+						'id' =>  $music['composer_id'],
+						'name' => $music['composer_name']
+    					),
+    				'lyricist' => array(
+						'id' => $music['lyricist_id'],
+						'name' => $music['lyricist_name']
+    					),
+    				'lyric_url' => $music['lyric_url'],
+    				'album' => array(
+						'id' => $album['id'],
+						'name' => $album['name'],
+						'cover_url' => $album['cover_url'],
+						'songs_num' => $album['songs_num']
+    					),
+    				'src' => $music['src_url'],
+    				'published_at' => $music['published_at']
+        			),
+        		'uploader' => array(
+    				'id' => $uploader['id'],
+    				'username' => $uploader['username'],
+    				'realname' => $uploader['realname'],
+    				'email' => $uploader['email'],
+    				'auth' => $uploader['auth']
+        			),
+        		'check' => $lyric['check']
 
 	        	);
 			//输出json串
@@ -372,43 +372,43 @@ class Lyrics extends REST_Controller
 		        ->result_array()[0];
 		        $info[$key] = array(
 
-		        		'id' => $lyric[$key]['id'],
-		        		'uploaded_at' => $lyric[$key]['uploaded_at'],
-		        		'lyric' => $lyric[$key]['lyric'],
-		        		'music' => array(
-		        				'id' => $music['id'],
-		        				'name' => $music['name'],
-		        				'coverr_url' => $music['cover_url'],
-		        				'singer' => array(
-		        						'id' => $music['singer_id'],
-		        						'name' => $music['singer_name']
-		        					),
-		        				'composer' => array(
-		        						'id' =>  $music['composer_id'],
-		        						'name' => $music['composer_name']
-		        					),
-		        				'lyricist' => array(
-		        						'id' => $music['lyricist_id'],
-		        						'name' => $music['lyricist_name']
-		        					),
-		        				'lyric_url' => $music['lyric_url'],
-		        				'album' => array(
-		        						'id' => $album['id'],
-		        						'name' => $album['name'],
-		        						'cover_url' => $album['cover_url'],
-		        						'songs_num' => $album['songs_num']
-		        					),
-		        				'src' => $music['src_url'],
-		        				'published_at' => $music['published_at']
-		        			),
-		        		'uploader' => array(
-		        				'id' => $uploader['id'],
-		        				'username' => $uploader['username'],
-		        				'realname' => $uploader['realname'],
-		        				'email' => $uploader['email'],
-		        				'auth' => $uploader['auth']
-		        			),
-	        			'check' => $lyric['check']
+	        		'id' => $lyric[$key]['id'],
+	        		'uploaded_at' => $lyric[$key]['uploaded_at'],
+	        		'lyric' => $lyric[$key]['lyric'],
+	        		'music' => array(
+        				'id' => $music['id'],
+        				'name' => $music['name'],
+        				'coverr_url' => $music['cover_url'],
+        				'singer' => array(
+    						'id' => $music['singer_id'],
+    						'name' => $music['singer_name']
+        					),
+        				'composer' => array(
+    						'id' =>  $music['composer_id'],
+    						'name' => $music['composer_name']
+        					),
+        				'lyricist' => array(
+    						'id' => $music['lyricist_id'],
+    						'name' => $music['lyricist_name']
+        					),
+        				'lyric_url' => $music['lyric_url'],
+        				'album' => array(
+    						'id' => $album['id'],
+    						'name' => $album['name'],
+    						'cover_url' => $album['cover_url'],
+    						'songs_num' => $album['songs_num']
+        					),
+        				'src' => $music['src_url'],
+        				'published_at' => $music['published_at']
+	        			),
+	        		'uploader' => array(
+        				'id' => $uploader['id'],
+        				'username' => $uploader['username'],
+        				'realname' => $uploader['realname'],
+        				'email' => $uploader['email'],
+        				'auth' => $uploader['auth']
+	        			),
+        			'check' => $lyric['check']
 
 		        	);
 	    	}
