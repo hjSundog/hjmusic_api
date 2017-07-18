@@ -20,45 +20,75 @@ class users extends REST_Controller
     function __construct() {
         parent::__construct();
         header('Access-Control-Allow-Origin:*');
-    }
 
+    }
 
     /**
      * 注册
      */
-    
-    public function register_post()
+    public function index_post()
     {
+        
 //        $data = [
 //            'user_email' => $this->input->post('user_email'),
 //            'password' => password_hash($this->input->post('password'),PASSWORD_DEFAULT)
 //        ];
-        $data = json_decode(trim(file_get_contents('php://input')), true);
-        $data['password'] = password_hash($data['password'],PASSWORD_DEFAULT);
-        $query = $this->db->get_where('user', array('user_email' => $data['user_email']))->row_array();
-        if($query){
-            $this->response(['error'=>'邮箱被占用！'], 400);
-        }else{
+        //$data = json_decode(trim(file_get_contents('php://input')), true);
+        $this->load->library('form_validation');
+        $data = $this->post();
+        $this->form_validation->set_data($data);
+
+        $this->form_validation->set_rules('email', 'Email', 'required|valid_email|is_unique[user.email]');
+        $this->form_validation->set_rules('password', 'Password', 'required');
+        //$this->form_validation->set_rules('passconf', 'Password Confirmation', 'required');
+        if ($this->form_validation->run() == true)
+        {
+            $data['password'] = password_hash($data['password'],PASSWORD_DEFAULT);
+            $query = $this->db->get_where('user', array('email' => $data['email']))->row_array();
+            
+            // if($query){
+            //     $this->response(['error'=>'邮箱被占用！'], 400);
+            // }else{
+            
             $this->db->insert('user', $data);
-            $user = $this->db->get_where('user', array('user_id' => $this->db->insert_id()))->row_array();
-            $user['token'] = $this->jwt->encode(['exp'=>time()+3600,'auth'=>$user['auth'],'id'=>$user['id']],$this->config->item('encryption_key'));
+            $user = $this->db->get_where('user', array('id' => $this->db->insert_id()))->row_array();
+            $user['token'] = $this->jwt->encode(['exp'=>time()+604800,'email'=>$user['email'],'user_id'=>$user['id']],$this->config->item('encryption_key'));
             unset($user['password']);
             $this->response($user, 200);
+            }
+        }
+        else{
+            $this->response(['error'=>'格式不正确！'], 400);
         }
     }
 
-    //登陆
-    public function signin_post()
+    /**
+     * 登陆
+     *
+     */
+    public function login_post()
     {
+        $this->load->library('form_validation');
 //        $data = [
 //            'user_email' => $this->input->post('user_email'),
 //            'password' => $this->input->post('password')
 //        ];
-        $data = json_decode(trim(file_get_contents('php://input')), true);
-        $user = $this->db->get_where('user', array('user_email' => $data['user_email']))->row_array();
+        // $data = json_decode(trim(file_get_contents('php://input')), true);
+        $data = $this->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules('email', 'Email', 'required|valid_email');
+        $this->form_validation->set_rules('password', 'Password', 'required');
+        if ($this->form_validation->run() == true)
+        {
+        $user = $this->db->get_where('user', array('email' => $data['email']))->row_array();
+        // print_r($data);
+        // print_r($user);
+        // exit;
         if($user){
             if (password_verify($data['password'], $user['password'])) {
-                $user['token'] = $this->jwt->encode(['exp'=>time()+604800,'auth'=>$user['auth'],'user_id'=>$user['id']],$this->config->item('encryption_key'));
+                $user['token'] = $this->jwt->encode(['exp'=>time()+604800,'auth'=>$user['auth'],'email'=>$user['email'],'id'=>$user['id']],$this->config->item('encryption_key'));
+                //$test = $this->jwt->decode($user['token'],'hjbook_key');
+                //$this->response($test, 200);
                 unset($user['password']);
                 $this->response($user, 200);
             }else{
@@ -67,59 +97,63 @@ class users extends REST_Controller
         }else{
             $this->response(['error'=>'邮箱未注册！'], 400);
         }
+        }
+        else{
+            $this->response(['error'=>'格式不正确！'], 400);
+        }
     }
 
-    // public function records_get($user_id)
-    // {
-    //     $record = $this->db->get_where('record', array('user_id' => $user_id))->result_array();
-    //     if($record)
-    //         $this->response($record, 200); // 200 being the HTTP response code
-    //     else
-    //         $this->response(array('error' => 'Couldn\'t find any record!'), 404);
-    // }
-    // function index_get($id = '')
-    // {
-    //     $query = $this->db->query('SELECT * FROM user');
-    //     // Example data for testing.
-    //     $user = $query->result_array();
+    public function records_get($user_id)
+    {
+        $record = $this->db->get_where('record', array('user_id' => $user_id))->result_array();
+        if($record)
+            $this->response($record, 200); // 200 being the HTTP response code
+        else
+            $this->response(array('error' => 'Couldn\'t find any record!'), 404);
+    }
+    function index_get($id = '')
+    {
+        $query = $this->db->query('SELECT * FROM user');
+        // Example data for testing.
+        $user = $query->result_array();
 
-    //     //if (!$user_id) { $user_id = $this->get('user_id'); }
-    //     if (!$id)
+        //if (!$user_id) { $user_id = $this->get('user_id'); }
+        if (!$id)
 
-    //         {
-    //             //$user = $this->user_model->getuser();
-    //             if($user){
-    //                 foreach($user as $key=>$value)
-    //                 {
-    //                     unset($value['password']);
-    //                     $user[$key] = $value;
-    //                 }
+            {
+                //$user = $this->user_model->getuser();
+                if($user){
+                    foreach($user as $key=>$value)
+                    {
+                        unset($value['password']);
+                        $user[$key] = $value;
+                    }
 
-    //                 $this->response($user, 200); // 200 being the HTTP response code
-    //             }
+                    $this->response($user, 200); // 200 being the HTTP response code
+                }
 
-    //             else
-    //                 $this->response(array('error' => 'Couldn\'t find any user!'), 404);
-    //         }
+                else
+                    $this->response(array('error' => 'Couldn\'t find any user!'), 404);
+            }
 
-    //     //$user = $this->user_model->getuser($id);
+        //$user = $this->user_model->getuser($id);
 
-    //     if ($id)
-    //         {
-    //         $query = $this->db->query('SELECT * FROM user WHERE id = '.$id);
+        if ($id)
+            {
+            $query = $this->db->query('SELECT * FROM user WHERE user_id = '.$id);
 
-    //         $user = $query->row_array();
-    //         if($user){
-    //             unset($user['password']);
-    //             $user['header'] = $this->input->get_request_header('Access-Token');
-    //             $this->response($user, 200); // 200 being the HTTP response code
-    //         }
+            $user = $query->row_array();
+            if($user){
+                unset($user['password']);
+                $user['header'] = $this->input->get_request_header('Access-Token');
+                $this->response($user, 200); // 200 being the HTTP response code
+            }
 
-    //         else
-    //             $this->response(array('error' => 'user could not be found'), 404);
-    //         }
-    //     if ($id == 0) $this->response(array('error' => 'user could not be found'), 404);
-    // }
+            else
+                $this->response(array('error' => 'user could not be found'), 404);
+            }
+        if ($id == 0) $this->response(array('error' => 'user could not be found'), 404);
+    }
 
 //    function index_post()
 //    {
@@ -161,39 +195,39 @@ class users extends REST_Controller
 //        */
 //    }
 
-    // public function index_put($id = '')
-    // {
-    //     $data = $this->_put_args;
-    //     if ($id) {
-    //         //存在问题 之前两个都可以为空的
-    //         //是否可以修改名字未知，暂时可以
-    //         $query = $this->db->query('UPDATE user SET user_name = "'.$data['user_name'].'", password = "'.$data['password'].'" WHERE user_id = '.$id);
-    //         $query = $this->db->query('SELECT * FROM user WHERE user_id = '.$id);
-    //         $user = $query->result();
-    //         //$user = array('id' => $data['id'], 'name' => $data['name']); // test code
-    //         //$user = $this->user_model->getuser($id);
-    //         $this->response($user, 200); // 200 being the HTTP response code
-    //     } else
-    //         $this->response(array('error' => 'user could not be found'), 404);
+    public function index_put($id = '')
+    {
+        $data = $this->_put_args;
+        if ($id) {
+            //存在问题 之前两个都可以为空的
+            //是否可以修改名字未知，暂时可以
+            $query = $this->db->query('UPDATE user SET user_name = "'.$data['user_name'].'", password = "'.$data['password'].'" WHERE user_id = '.$id);
+            $query = $this->db->query('SELECT * FROM user WHERE user_id = '.$id);
+            $user = $query->result();
+            //$user = array('id' => $data['id'], 'name' => $data['name']); // test code
+            //$user = $this->user_model->getuser($id);
+            $this->response($user, 200); // 200 being the HTTP response code
+        } else
+            $this->response(array('error' => 'user could not be found'), 404);
 
-    // }
+    }
 
-    // function index_delete($id = '')
-    // {
-    //     if (!$id) { $id = $this->get('id'); }
-    //     if (!$id)
-    //     {
-    //         $this->response(array('error' => 'An ID must be supplied to delete a user'), 400);
-    //     }
+    function index_delete($id = '')
+    {
+        if (!$id) { $id = $this->get('id'); }
+        if (!$id)
+        {
+            $this->response(array('error' => 'An ID must be supplied to delete a user'), 400);
+        }
 
-    //     $query = $this->db->query('DELETE FROM user WHERE user_id ='.$id);
+        $query = $this->db->query('DELETE FROM user WHERE user_id ='.$id);
 
 
-    //     if($query) {
-    //         $this->response(array('message' => 'Delete OK!'), 200);
-    //     } else
-    //         $this->response(array('error' => 'user could not be found'), 404);
-    // }
+        if($query) {
+            $this->response(array('message' => 'Delete OK!'), 200);
+        } else
+            $this->response(array('error' => 'user could not be found'), 404);
+    }
 }
 
 
